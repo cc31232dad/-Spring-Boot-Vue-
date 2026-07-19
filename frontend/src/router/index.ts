@@ -7,7 +7,9 @@ import RegisterView from '../views/auth/RegisterView.vue'
 const router = createRouter({
   history: typeof window === 'undefined' ? createMemoryHistory() : createWebHistory(),
   routes: [
-    { path: '/', name: 'home', component: HomeView, meta: { requiresAuth: true } },
+    { path: '/', name: 'home', component: HomeView },
+    // Temporary resolution target for catalog cards; Task 6 replaces this with the detail view.
+    { path: '/products/:id', name: 'product-detail', redirect: { name: 'home' } },
     { path: '/login', name: 'login', component: LoginView },
     { path: '/register', name: 'register', component: RegisterView }
   ]
