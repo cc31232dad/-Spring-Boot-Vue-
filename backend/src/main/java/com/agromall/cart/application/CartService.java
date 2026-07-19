@@ -101,6 +101,17 @@ public class CartService {
         return items;
     }
 
+    public List<CartItem> getOwnedItemsForCheckout(Long userId, List<Long> itemIds) {
+        if (itemIds.isEmpty()) {
+            return List.of();
+        }
+        List<CartItem> items = cartItemMapper.selectOwnedItemsForUpdate(userId, itemIds);
+        if (items.size() != itemIds.size()) {
+            throw new BusinessException(ErrorCode.CART_ITEM_NOT_FOUND);
+        }
+        return items;
+    }
+
     @Transactional
     public void deleteItems(Long userId, List<Long> itemIds) {
         if (itemIds.isEmpty()) {

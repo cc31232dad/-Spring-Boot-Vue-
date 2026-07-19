@@ -114,6 +114,24 @@ class OrderCheckoutApiTest {
     }
 
     @Test
+    void checkoutOfAlreadyCheckedOutCartItemFailsWithoutCreatingAnotherOrder() throws Exception {
+        Product product = insertProduct(farmerOne, "Single-use cart apples", 4);
+        long cartItemId = addCartItem(product.getId(), 1);
+
+        checkoutOrder(cartItemId);
+
+        mvc.perform(post("/api/orders/checkout")
+                        .header("Authorization", "Bearer " + buyerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(checkoutBody(cartItemId)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value(1008));
+
+        assertThat(orderMapper.selectCount(null)).isEqualTo(1);
+        assertThat(productMapper.selectById(product.getId()).getStock()).isEqualTo(3);
+    }
+
+    @Test
     void orderSnapshotsDoNotMakeOffSaleProductPublicAgain() throws Exception {
         Product product = insertProduct(farmerOne, "Snapshot apples", 4);
         long cartItemId = addCartItem(product.getId(), 1);
@@ -148,7 +166,20 @@ class OrderCheckoutApiTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.status").value("CANCELLED"));
 
+        mvc.perform(patch("/api/orders/{id}/cancel", orderId).header("Authorization", "Bearer " + buyerToken))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value(1012));
+
         assertThat(productMapper.selectById(product.getId()).getStock()).isEqualTo(6);
+    }
+
+    @Test
+    void onlyOneConditionalCancellationTransitionCanWin() throws Exception {
+        Product product = insertProduct(farmerOne, "Transition-guard apples", 6);
+        long orderId = checkoutOrder(addCartItem(product.getId(), 1));
+
+        assertThat(orderMapper.markCancelledIfPending(orderId)).isOne();
+        assertThat(orderMapper.markCancelledIfPending(orderId)).isZero();
     }
 
     @Test

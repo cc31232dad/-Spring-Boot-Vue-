@@ -49,7 +49,7 @@ public class OrderService {
 
     @Transactional
     public List<OrderView> checkout(Long buyerId, CheckoutRequest request) {
-        List<CartItem> cartItems = cartService.getOwnedItems(buyerId, request.cartItemIds());
+        List<CartItem> cartItems = cartService.getOwnedItemsForCheckout(buyerId, request.cartItemIds());
         if (cartItems.size() != request.cartItemIds().size()) {
             throw new BusinessException(ErrorCode.CART_ITEM_NOT_FOUND);
         }
@@ -88,7 +88,7 @@ public class OrderService {
     @Transactional
     public OrderView cancel(Long buyerId, Long orderId) {
         Order order = ownedOrder(buyerId, orderId);
-        if (!OrderStatus.PENDING_SHIPMENT.name().equals(order.getStatus())) {
+        if (orderMapper.markCancelledIfPending(orderId) != 1) {
             throw new BusinessException(ErrorCode.INVALID_ORDER_STATUS);
         }
         List<OrderItem> items = orderItems(order.getId());
@@ -96,7 +96,6 @@ public class OrderService {
             productMapper.restoreStock(item.getProductId(), item.getQuantity());
         }
         order.setStatus(OrderStatus.CANCELLED.name());
-        orderMapper.updateById(order);
         return toView(order, items);
     }
 
