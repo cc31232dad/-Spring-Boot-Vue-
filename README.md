@@ -1,6 +1,6 @@
 # Agricultural Mall
 
-Phase 1 provides account registration, login, JWT session recovery, and role-based API access.
+Phase 1 provides account registration, login, JWT session recovery, and role-based API access. Phase 2 adds the product catalog, including public browsing and farmer/admin product management.
 
 ## Prerequisites
 
@@ -55,6 +55,8 @@ cd frontend
 npm run test -- --run
 npm run build
 ```
+
+For the Phase 2 product catalog acceptance flow and browser checklist, see [docs/testing/phase-2-product-catalog.md](docs/testing/phase-2-product-catalog.md).
 
 ## Security notes
 

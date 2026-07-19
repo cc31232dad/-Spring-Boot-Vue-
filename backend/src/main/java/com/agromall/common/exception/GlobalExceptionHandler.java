@@ -40,6 +40,7 @@ public class GlobalExceptionHandler {
             case INVALID_CREDENTIALS, UNAUTHORIZED -> HttpStatus.UNAUTHORIZED;
             case FORBIDDEN -> HttpStatus.FORBIDDEN;
             case VALIDATION_ERROR -> HttpStatus.BAD_REQUEST;
+            case PRODUCT_NOT_FOUND, CATEGORY_NOT_FOUND -> HttpStatus.NOT_FOUND;
             case INTERNAL_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
     }
