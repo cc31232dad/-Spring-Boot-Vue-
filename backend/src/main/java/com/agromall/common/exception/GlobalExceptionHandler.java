@@ -36,11 +36,11 @@ public class GlobalExceptionHandler {
 
     private HttpStatus statusFor(ErrorCode errorCode) {
         return switch (errorCode) {
-            case USER_ALREADY_EXISTS -> HttpStatus.CONFLICT;
+            case USER_ALREADY_EXISTS, PRODUCT_UNAVAILABLE, INSUFFICIENT_STOCK, INVALID_ORDER_STATUS -> HttpStatus.CONFLICT;
             case INVALID_CREDENTIALS, UNAUTHORIZED -> HttpStatus.UNAUTHORIZED;
             case FORBIDDEN -> HttpStatus.FORBIDDEN;
             case VALIDATION_ERROR -> HttpStatus.BAD_REQUEST;
-            case PRODUCT_NOT_FOUND, CATEGORY_NOT_FOUND -> HttpStatus.NOT_FOUND;
+            case PRODUCT_NOT_FOUND, CATEGORY_NOT_FOUND, CART_ITEM_NOT_FOUND, ORDER_NOT_FOUND -> HttpStatus.NOT_FOUND;
             case INTERNAL_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
     }
