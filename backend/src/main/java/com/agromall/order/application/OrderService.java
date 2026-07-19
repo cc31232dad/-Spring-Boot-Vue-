@@ -85,6 +85,29 @@ public class OrderService {
         return toView(ownedOrder(buyerId, orderId));
     }
 
+    public List<OrderView> listFarmerOrders(Long farmerId) {
+        return orderMapper.selectList(new LambdaQueryWrapper<Order>()
+                        .eq(Order::getFarmerId, farmerId)
+                        .orderByDesc(Order::getCreatedAt))
+                .stream().map(this::toView).toList();
+    }
+
+    @Transactional
+    public OrderView shipOrder(Long farmerId, Long orderId) {
+        Order order = farmerOrder(farmerId, orderId);
+        if (orderMapper.markShippedIfPending(orderId) != 1) {
+            throw new BusinessException(ErrorCode.INVALID_ORDER_STATUS);
+        }
+        order.setStatus(OrderStatus.SHIPPED.name());
+        return toView(order);
+    }
+
+    public List<OrderView> listAdminOrders() {
+        return orderMapper.selectList(new LambdaQueryWrapper<Order>()
+                        .orderByDesc(Order::getCreatedAt))
+                .stream().map(this::toView).toList();
+    }
+
     @Transactional
     public OrderView cancel(Long buyerId, Long orderId) {
         Order order = ownedOrder(buyerId, orderId);
@@ -157,6 +180,15 @@ public class OrderService {
     private Order ownedOrder(Long buyerId, Long orderId) {
         Order order = orderMapper.selectOne(new LambdaQueryWrapper<Order>()
                 .eq(Order::getId, orderId).eq(Order::getBuyerId, buyerId));
+        if (order == null) {
+            throw new BusinessException(ErrorCode.ORDER_NOT_FOUND);
+        }
+        return order;
+    }
+
+    private Order farmerOrder(Long farmerId, Long orderId) {
+        Order order = orderMapper.selectOne(new LambdaQueryWrapper<Order>()
+                .eq(Order::getId, orderId).eq(Order::getFarmerId, farmerId));
         if (order == null) {
             throw new BusinessException(ErrorCode.ORDER_NOT_FOUND);
         }

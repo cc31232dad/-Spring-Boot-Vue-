@@ -51,4 +51,20 @@ public class OrderController {
                                            @PathVariable Long id) {
         return ApiResponse.ok(orderService.complete(principal.userId(), id));
     }
+
+    @GetMapping("/api/farmer/orders")
+    public ApiResponse<List<OrderView>> farmerOrders(@AuthenticationPrincipal JwtService.JwtPrincipal principal) {
+        return ApiResponse.ok(orderService.listFarmerOrders(principal.userId()));
+    }
+
+    @PatchMapping("/api/farmer/orders/{id}/ship")
+    public ApiResponse<OrderView> ship(@AuthenticationPrincipal JwtService.JwtPrincipal principal,
+                                       @PathVariable Long id) {
+        return ApiResponse.ok(orderService.shipOrder(principal.userId(), id));
+    }
+
+    @GetMapping("/api/admin/orders")
+    public ApiResponse<List<OrderView>> adminOrders() {
+        return ApiResponse.ok(orderService.listAdminOrders());
+    }
 }
