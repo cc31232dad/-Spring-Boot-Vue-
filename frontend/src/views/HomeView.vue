@@ -53,6 +53,17 @@ async function chooseCategory(id?: number) {
   }
 }
 
+async function clearFilters() {
+  loadError.value = ''
+
+  try {
+    searchText.value = ''
+    await productStore.clearFilters()
+  } catch {
+    loadError.value = '清除筛选条件失败，请稍后重试。'
+  }
+}
+
 async function logout() {
   auth.clearSession()
   await router.replace('/login')
@@ -131,7 +142,7 @@ async function logout() {
       </div>
       <div v-else class="catalog-empty">
         <p>暂时没有找到合适的农产品。</p>
-        <button type="button" @click="chooseCategory(undefined)">清除分类筛选</button>
+        <button type="button" @click="clearFilters">清除筛选条件</button>
       </div>
     </section>
   </main>

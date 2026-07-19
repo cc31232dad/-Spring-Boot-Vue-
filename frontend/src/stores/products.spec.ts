@@ -35,4 +35,17 @@ describe('product store', () => {
     expect(store.categories).toHaveLength(1)
     expect(store.products[0].name).toBe('洛川苹果')
   })
+
+  it('clears both keyword and category filters before reloading products', async () => {
+    vi.mocked(api.listProducts).mockResolvedValue([])
+    const store = useProductStore()
+
+    await store.search('apples')
+    await store.selectCategory(1)
+    await store.clearFilters()
+
+    expect(store.keyword).toBe('')
+    expect(store.categoryId).toBeUndefined()
+    expect(api.listProducts).toHaveBeenLastCalledWith({ keyword: undefined, categoryId: undefined })
+  })
 })

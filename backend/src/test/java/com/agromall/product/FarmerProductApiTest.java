@@ -100,6 +100,26 @@ class FarmerProductApiTest {
     }
 
     @Test
+    void farmerCreatesProductWithRootRelativeImageUrl() throws Exception {
+        mvc.perform(post("/api/farmer/products")
+                        .header("Authorization", "Bearer " + firstFarmerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(productRequest("Local image apples").replace("https://example.com/apple.jpg", "/images/apple.jpg")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.imageUrl").value("/images/apple.jpg"));
+    }
+
+    @Test
+    void farmerCannotCreateProductWithInvalidImageUrl() throws Exception {
+        mvc.perform(post("/api/farmer/products")
+                        .header("Authorization", "Bearer " + firstFarmerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(productRequest("Invalid image apples").replace("https://example.com/apple.jpg", "not-a-url")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(1005));
+    }
+
+    @Test
     void anotherFarmerCannotUpdateProduct() throws Exception {
         Product product = Product.create(1L, firstFarmer.getId(), "Owned apples", "Fresh apples",
                 new BigDecimal("12.50"), 30, "Shaanxi", "https://example.com/apple.jpg");
@@ -111,6 +131,20 @@ class FarmerProductApiTest {
                         .content(productRequest("Changed apples")))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value(1004));
+    }
+
+    @Test
+    void farmerCannotUpdateProductWithInvalidImageUrl() throws Exception {
+        Product product = Product.create(1L, firstFarmer.getId(), "Owned apples", "Fresh apples",
+                new BigDecimal("12.50"), 30, "Shaanxi", "https://example.com/apple.jpg");
+        productMapper.insert(product);
+
+        mvc.perform(put("/api/farmer/products/{id}", product.getId())
+                        .header("Authorization", "Bearer " + firstFarmerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(productRequest("Changed apples").replace("https://example.com/apple.jpg", "not-a-url")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(1005));
     }
 
     @Test

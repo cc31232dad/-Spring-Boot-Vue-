@@ -24,9 +24,15 @@ export const useProductStore = defineStore('products', () => {
     products.value = await api.listProducts({ keyword: value || undefined, categoryId: categoryId.value })
   }
 
+  async function clearFilters() {
+    keyword.value = ''
+    categoryId.value = undefined
+    products.value = await api.listProducts({ keyword: undefined, categoryId: undefined })
+  }
+
   async function loadProduct(id: number) {
     currentProduct.value = await api.getProduct(id)
   }
 
-  return { categories, products, currentProduct, keyword, categoryId, loadCatalog, selectCategory, search, loadProduct }
+  return { categories, products, currentProduct, keyword, categoryId, loadCatalog, selectCategory, search, clearFilters, loadProduct }
 })
