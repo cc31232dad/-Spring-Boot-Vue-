@@ -11,22 +11,31 @@ const searchText = ref('')
 const loadError = ref('')
 
 onMounted(async () => {
-  try {
-    await productStore.loadCatalog()
-  } catch {
-    loadError.value = '商品目录暂时无法加载，请稍后刷新重试。'
-  }
+  await loadCatalog()
 
   if (auth.isLoggedIn) {
     try {
       await auth.loadCurrentUser()
     } catch {
-      auth.clearSession()
+      // The shared HTTP interceptor clears only invalid (401) sessions.
+      // Keep a valid local session through transient account-loading failures.
     }
   }
 })
 
+async function loadCatalog() {
+  loadError.value = ''
+
+  try {
+    await productStore.loadCatalog()
+  } catch {
+    loadError.value = '商品目录暂时无法加载，请稍后刷新重试。'
+  }
+}
+
 async function searchProducts() {
+  loadError.value = ''
+
   try {
     await productStore.search(searchText.value)
   } catch {
@@ -35,6 +44,8 @@ async function searchProducts() {
 }
 
 async function chooseCategory(id?: number) {
+  loadError.value = ''
+
   try {
     await productStore.selectCategory(id)
   } catch {
@@ -103,7 +114,10 @@ async function logout() {
         <span class="product-count">共 {{ productStore.products.length }} 件</span>
       </div>
 
-      <p v-if="loadError" class="form-error" role="alert">{{ loadError }}</p>
+      <div v-if="loadError" class="catalog-error" role="alert">
+        <p class="form-error">{{ loadError }}</p>
+        <button type="button" @click="loadCatalog">重新加载商品</button>
+      </div>
       <div v-else-if="productStore.products.length" class="product-grid">
         <RouterLink v-for="product in productStore.products" :key="product.id" class="product-card" :to="{ name: 'product-detail', params: { id: product.id } }">
           <img :src="product.imageUrl" :alt="product.name" />
@@ -117,7 +131,7 @@ async function logout() {
       </div>
       <div v-else class="catalog-empty">
         <p>暂时没有找到合适的农产品。</p>
-        <button type="button" @click="chooseCategory(undefined)">查看全部商品</button>
+        <button type="button" @click="chooseCategory(undefined)">清除分类筛选</button>
       </div>
     </section>
   </main>
