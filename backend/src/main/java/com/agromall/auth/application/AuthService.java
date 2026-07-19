@@ -1,7 +1,10 @@
 package com.agromall.auth.application;
 
 import com.agromall.auth.api.RegisterRequest;
+import com.agromall.auth.api.LoginRequest;
+import com.agromall.auth.api.TokenView;
 import com.agromall.auth.api.UserSessionView;
+import com.agromall.auth.security.JwtService;
 import com.agromall.common.exception.BusinessException;
 import com.agromall.common.exception.ErrorCode;
 import com.agromall.user.domain.Role;
@@ -22,12 +25,21 @@ public class AuthService {
     private final UserMapper userMapper;
     private final RoleMapper roleMapper;
     private final UserRoleMapper userRoleMapper;
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-    public AuthService(UserMapper userMapper, RoleMapper roleMapper, UserRoleMapper userRoleMapper) {
+    public AuthService(
+            UserMapper userMapper,
+            RoleMapper roleMapper,
+            UserRoleMapper userRoleMapper,
+            BCryptPasswordEncoder passwordEncoder,
+            JwtService jwtService
+    ) {
         this.userMapper = userMapper;
         this.roleMapper = roleMapper;
         this.userRoleMapper = userRoleMapper;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     @Transactional
@@ -46,5 +58,13 @@ public class AuthService {
         userRoleMapper.insert(user.getId(), userRole.getId());
 
         return new UserSessionView(user.getId(), user.getUsername(), roleMapper.selectCodesByUserId(user.getId()));
+    }
+
+    public TokenView login(LoginRequest request) {
+        User user = userMapper.selectByUsername(request.username())
+                .filter(candidate -> passwordEncoder.matches(request.password(), candidate.getPasswordHash()))
+                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CREDENTIALS));
+
+        return TokenView.bearer(jwtService.issue(user, roleMapper.selectCodesByUserId(user.getId())));
     }
 }
