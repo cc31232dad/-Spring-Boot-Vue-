@@ -1,0 +1,46 @@
+package com.agromall.common.exception;
+
+import com.agromall.common.api.ApiResponse;
+import jakarta.validation.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException exception) {
+        return ResponseEntity.status(statusFor(exception.errorCode()))
+                .body(ApiResponse.error(exception.errorCode()));
+    }
+
+    @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class, ConstraintViolationException.class})
+    public ResponseEntity<ApiResponse<Void>> handleValidationException(Exception exception) {
+        return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.VALIDATION_ERROR));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Void>> handleUnexpectedException(Exception exception) {
+        log.error("Unhandled exception", exception);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(ErrorCode.INTERNAL_ERROR));
+    }
+
+    private HttpStatus statusFor(ErrorCode errorCode) {
+        return switch (errorCode) {
+            case USER_ALREADY_EXISTS -> HttpStatus.CONFLICT;
+            case INVALID_CREDENTIALS, UNAUTHORIZED -> HttpStatus.UNAUTHORIZED;
+            case FORBIDDEN -> HttpStatus.FORBIDDEN;
+            case VALIDATION_ERROR -> HttpStatus.BAD_REQUEST;
+            case INTERNAL_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
+        };
+    }
+}
