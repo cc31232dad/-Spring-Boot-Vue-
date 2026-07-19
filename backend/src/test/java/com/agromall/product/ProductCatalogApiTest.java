@@ -18,6 +18,8 @@ import java.math.BigDecimal;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -69,7 +71,8 @@ class ProductCatalogApiTest {
         mvc.perform(get("/api/products").param("keyword", "苹果").param("categoryId", "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].name").value("洛川苹果"))
-                .andExpect(jsonPath("$.data[0].categoryName").value("水果"));
+                .andExpect(jsonPath("$.data[0].categoryName").value("水果"))
+                .andExpect(jsonPath("$.data[*].name", not(hasItem("下架苹果"))));
     }
 
     @Test
