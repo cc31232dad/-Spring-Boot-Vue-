@@ -1,0 +1,12 @@
+.worktrees/
+.superpowers/
+
+# Local secrets and runtime data
+.env
+backend/target/
+backend/target-stale-*/
+backend/.m2-repository/
+.m2-repository/
+frontend/node_modules/
+frontend/dist/
+data/
