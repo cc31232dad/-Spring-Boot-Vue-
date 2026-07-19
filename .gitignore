@@ -1,0 +1,8 @@
+.worktrees/
+
+# Local secrets and runtime data
+.env
+backend/target/
+frontend/node_modules/
+frontend/dist/
+data/
