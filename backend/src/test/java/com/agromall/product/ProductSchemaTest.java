@@ -1,10 +1,12 @@
 package com.agromall.product;
 
 import com.agromall.product.domain.Product;
+import com.agromall.product.domain.ProductCategory;
 import com.agromall.product.infrastructure.ProductCategoryMapper;
 import com.agromall.product.infrastructure.ProductMapper;
 import com.agromall.user.domain.User;
 import com.agromall.user.infrastructure.UserMapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,7 +26,8 @@ class ProductSchemaTest {
 
     @Test
     void seedsCategoriesAndPersistsProduct() {
-        assertThat(categoryMapper.selectList(null))
+        assertThat(categoryMapper.selectList(new LambdaQueryWrapper<ProductCategory>()
+                .orderByAsc(ProductCategory::getSortOrder)))
                 .extracting("name")
                 .containsExactly("水果", "蔬菜", "粮油", "禽蛋肉类", "茶叶特产");
 
