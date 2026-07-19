@@ -4,6 +4,7 @@
 # Local secrets and runtime data
 .env
 backend/target/
+backend/.m2-repository/
 frontend/node_modules/
 frontend/dist/
 data/

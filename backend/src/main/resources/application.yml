@@ -1,0 +1,14 @@
+spring:
+  application.name: agricultural-mall
+  datasource:
+    url: ${AGROMALL_DB_URL:jdbc:mysql://localhost:3306/agromall?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai}
+    username: ${AGROMALL_DB_USERNAME:agromall}
+    password: ${AGROMALL_DB_PASSWORD:agromall_dev}
+  data.redis:
+    host: ${AGROMALL_REDIS_HOST:localhost}
+    port: ${AGROMALL_REDIS_PORT:6379}
+  flyway.enabled: true
+server.port: ${SERVER_PORT:8080}
+agromall.jwt:
+  secret: ${AGROMALL_JWT_SECRET}
+  access-token-minutes: 30
