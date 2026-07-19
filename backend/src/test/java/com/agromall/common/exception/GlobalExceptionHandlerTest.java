@@ -1,12 +1,10 @@
 package com.agromall.common.exception;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Import;
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,13 +19,19 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest
-@AutoConfigureMockMvc(addFilters = false)
-@Import({GlobalExceptionHandler.class, GlobalExceptionHandlerTest.Config.class})
 class GlobalExceptionHandlerTest {
 
-    @Autowired
     MockMvc mvc;
+
+    @BeforeEach
+    void setUp() {
+        LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+        validator.afterPropertiesSet();
+        mvc = MockMvcBuilders.standaloneSetup(new TestController())
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .setValidator(validator)
+                .build();
+    }
 
     @Test
     void mapsBusinessExceptionToConflict() throws Exception {
@@ -53,28 +57,24 @@ class GlobalExceptionHandlerTest {
                 .andExpect(jsonPath("$.stackTrace").doesNotExist());
     }
 
-    @TestConfiguration
-    static class Config {
+    @RestController
+    static class TestController {
 
-        @RestController
-        static class C {
-
-            @GetMapping("/test-error")
-            void fail() {
-                throw new BusinessException(ErrorCode.USER_ALREADY_EXISTS);
-            }
-
-            @PostMapping("/test-validation")
-            void validate(@Valid @RequestBody Request request) {
-            }
-
-            @GetMapping("/test-unknown")
-            void unknown() {
-                throw new IllegalStateException("unexpected");
-            }
+        @GetMapping("/test-error")
+        void fail() {
+            throw new BusinessException(ErrorCode.USER_ALREADY_EXISTS);
         }
 
-        record Request(@NotBlank String name) {
+        @PostMapping("/test-validation")
+        void validate(@Valid @RequestBody Request request) {
         }
+
+        @GetMapping("/test-unknown")
+        void unknown() {
+            throw new IllegalStateException("unexpected");
+        }
+    }
+
+    record Request(@NotBlank String name) {
     }
 }
