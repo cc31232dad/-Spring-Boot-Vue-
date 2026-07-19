@@ -3,8 +3,10 @@ package com.agromall.product.application;
 import com.agromall.common.exception.BusinessException;
 import com.agromall.common.exception.ErrorCode;
 import com.agromall.product.api.CategoryView;
+import com.agromall.product.api.ProductCreateRequest;
 import com.agromall.product.api.ProductDetailView;
 import com.agromall.product.api.ProductSummaryView;
+import com.agromall.product.api.ProductUpdateRequest;
 import com.agromall.product.domain.Product;
 import com.agromall.product.domain.ProductCategory;
 import com.agromall.product.domain.ProductStatus;
@@ -64,6 +66,60 @@ public class ProductService {
         if (product == null) {
             throw new BusinessException(ErrorCode.PRODUCT_NOT_FOUND);
         }
+        return toDetailView(product);
+    }
+
+    public ProductDetailView createProduct(Long actorId, ProductCreateRequest request) {
+        assertCategoryExists(request.categoryId());
+        Product product = Product.create(request.categoryId(), actorId, request.name(), request.description(),
+                request.price(), request.stock(), request.originPlace(), request.imageUrl());
+        productMapper.insert(product);
+        return toDetailView(product);
+    }
+
+    public ProductDetailView updateProduct(Long actorId, boolean admin, Long productId, ProductUpdateRequest request) {
+        Product product = getProduct(productId);
+        assertCanManage(actorId, admin, product);
+        assertCategoryExists(request.categoryId());
+        product.update(request.categoryId(), request.name(), request.description(), request.price(), request.stock(),
+                request.originPlace(), request.imageUrl());
+        productMapper.updateById(product);
+        return toDetailView(product);
+    }
+
+    public ProductDetailView changeStatus(Long actorId, boolean admin, Long productId, ProductStatus status) {
+        Product product = getProduct(productId);
+        assertCanManage(actorId, admin, product);
+        if (status == ProductStatus.ON_SALE) {
+            product.onSale();
+        } else {
+            product.offSale();
+        }
+        productMapper.updateById(product);
+        return toDetailView(product);
+    }
+
+    private Product getProduct(Long productId) {
+        Product product = productMapper.selectById(productId);
+        if (product == null) {
+            throw new BusinessException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+        return product;
+    }
+
+    private void assertCanManage(Long actorId, boolean admin, Product product) {
+        if (!admin && !product.getFarmerId().equals(actorId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+    }
+
+    private void assertCategoryExists(Long categoryId) {
+        if (categoryMapper.selectById(categoryId) == null) {
+            throw new BusinessException(ErrorCode.CATEGORY_NOT_FOUND);
+        }
+    }
+
+    private ProductDetailView toDetailView(Product product) {
         String categoryName = categoryNames().get(product.getCategoryId());
         return new ProductDetailView(product.getId(), product.getCategoryId(), categoryName, product.getFarmerId(),
                 product.getName(), product.getDescription(), product.getPrice(), product.getStock(),
