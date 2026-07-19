@@ -56,6 +56,8 @@ npm run test -- --run
 npm run build
 ```
 
+For the Phase 2 product catalog acceptance flow and browser checklist, see [docs/testing/phase-2-product-catalog.md](docs/testing/phase-2-product-catalog.md).
+
 ## Security notes
 
 - `.env` is local-only and must never be committed.
