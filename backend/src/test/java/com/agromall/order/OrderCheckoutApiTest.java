@@ -183,6 +183,18 @@ class OrderCheckoutApiTest {
     }
 
     @Test
+    void onlyOneConditionalCompletionTransitionCanWin() throws Exception {
+        Product product = insertProduct(farmerOne, "Completion-guard apples", 6);
+        long orderId = checkoutOrder(addCartItem(product.getId(), 1));
+        com.agromall.order.domain.Order order = orderMapper.selectById(orderId);
+        order.setStatus("SHIPPED");
+        orderMapper.updateById(order);
+
+        assertThat(orderMapper.markCompletedIfShipped(orderId)).isOne();
+        assertThat(orderMapper.markCompletedIfShipped(orderId)).isZero();
+    }
+
+    @Test
     void buyerCanCompleteOnlyShippedOrder() throws Exception {
         Product product = insertProduct(farmerOne, "Shipped apples", 6);
         long orderId = checkoutOrder(addCartItem(product.getId(), 1));

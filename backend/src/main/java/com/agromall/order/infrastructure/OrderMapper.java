@@ -10,4 +10,7 @@ import org.apache.ibatis.annotations.Update;
 public interface OrderMapper extends BaseMapper<Order> {
     @Update("UPDATE orders SET status = 'CANCELLED' WHERE id = #{orderId} AND status = 'PENDING_SHIPMENT'")
     int markCancelledIfPending(@Param("orderId") Long orderId);
+
+    @Update("UPDATE orders SET status = 'COMPLETED' WHERE id = #{orderId} AND status = 'SHIPPED'")
+    int markCompletedIfShipped(@Param("orderId") Long orderId);
 }

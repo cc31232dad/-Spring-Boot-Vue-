@@ -102,11 +102,10 @@ public class OrderService {
     @Transactional
     public OrderView complete(Long buyerId, Long orderId) {
         Order order = ownedOrder(buyerId, orderId);
-        if (!OrderStatus.SHIPPED.name().equals(order.getStatus())) {
+        if (orderMapper.markCompletedIfShipped(orderId) != 1) {
             throw new BusinessException(ErrorCode.INVALID_ORDER_STATUS);
         }
         order.setStatus(OrderStatus.COMPLETED.name());
-        orderMapper.updateById(order);
         return toView(order);
     }
 
