@@ -1,11 +1,19 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { getProduct, type ProductDetail } from '../api/products'
+import { useAuthStore } from '../stores/auth'
+import { useCartStore } from '../stores/cart'
 
 const route = useRoute()
+const router = useRouter()
+const auth = useAuthStore()
+const cartStore = useCartStore()
 const product = ref<ProductDetail | null>(null)
 const loadError = ref('')
+const quantity = ref(1)
+const addError = ref('')
+const isAdding = ref(false)
 
 onMounted(async () => {
   try {
@@ -14,6 +22,27 @@ onMounted(async () => {
     loadError.value = '商品暂时无法加载，请稍后返回目录重试。'
   }
 })
+
+async function addToCart() {
+  if (!product.value) return
+
+  if (!auth.isLoggedIn) {
+    await router.push({ name: 'login', query: { redirect: route.fullPath } })
+    return
+  }
+
+  addError.value = ''
+  isAdding.value = true
+
+  try {
+    await cartStore.addItem({ productId: product.value.id, quantity: quantity.value })
+    await router.push({ name: 'cart' })
+  } catch {
+    addError.value = '加入购物车失败，请确认库存后重试。'
+  } finally {
+    isAdding.value = false
+  }
+}
 </script>
 
 <template>
@@ -36,6 +65,16 @@ onMounted(async () => {
           <span>商品说明</span>
           <p>{{ product.description }}</p>
         </div>
+        <div class="add-to-cart">
+          <label class="quantity-control">
+            <span>购买数量</span>
+            <input v-model.number="quantity" type="number" min="1" :max="product.stock" :disabled="product.stock < 1" />
+          </label>
+          <button type="button" :disabled="isAdding || product.stock < 1" @click="addToCart">
+            {{ product.stock < 1 ? '暂时售罄' : isAdding ? '正在加入…' : '加入购物车' }}
+          </button>
+        </div>
+        <p v-if="addError" class="form-error" role="alert">{{ addError }}</p>
       </div>
     </article>
   </main>
