@@ -57,12 +57,12 @@ public class CartService {
         CartItem item = cartItemMapper.selectOne(new LambdaQueryWrapper<CartItem>()
                 .eq(CartItem::getUserId, userId)
                 .eq(CartItem::getProductId, request.productId()));
-        int quantity = request.quantity() + (item == null ? 0 : item.getQuantity());
+        long quantity = (long) request.quantity() + (item == null ? 0 : item.getQuantity());
         assertSufficientStock(product, quantity);
         if (item == null) {
-            cartItemMapper.insert(CartItem.create(userId, request.productId(), quantity));
+            cartItemMapper.insert(CartItem.create(userId, request.productId(), (int) quantity));
         } else {
-            item.setQuantity(quantity);
+            item.setQuantity((int) quantity);
             cartItemMapper.updateById(item);
         }
         return getCart(userId);
@@ -89,6 +89,9 @@ public class CartService {
     }
 
     public List<CartItem> getOwnedItems(Long userId, List<Long> itemIds) {
+        if (itemIds.isEmpty()) {
+            return List.of();
+        }
         List<CartItem> items = cartItemMapper.selectList(new LambdaQueryWrapper<CartItem>()
                 .eq(CartItem::getUserId, userId)
                 .in(CartItem::getId, itemIds));
@@ -100,6 +103,9 @@ public class CartService {
 
     @Transactional
     public void deleteItems(Long userId, List<Long> itemIds) {
+        if (itemIds.isEmpty()) {
+            return;
+        }
         getOwnedItems(userId, itemIds);
         cartItemMapper.delete(new LambdaQueryWrapper<CartItem>()
                 .eq(CartItem::getUserId, userId)
@@ -127,8 +133,8 @@ public class CartService {
         return product;
     }
 
-    private void assertSufficientStock(Product product, int quantity) {
-        if (quantity > product.getStock()) {
+    private void assertSufficientStock(Product product, long quantity) {
+        if (quantity <= 0 || quantity > product.getStock()) {
             throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
         }
     }
