@@ -114,6 +114,16 @@ class OrderCheckoutApiTest {
     }
 
     @Test
+    void atomicStockDeductionRequiresProductStillOnSale() {
+        Product product = insertProduct(farmerOne, "Atomic off-sale apples", 5);
+        product.offSale();
+        productMapper.updateById(product);
+
+        assertThat(productMapper.deductStock(product.getId(), 1)).isZero();
+        assertThat(productMapper.selectById(product.getId()).getStock()).isEqualTo(5);
+    }
+
+    @Test
     void checkoutOfAlreadyCheckedOutCartItemFailsWithoutCreatingAnotherOrder() throws Exception {
         Product product = insertProduct(farmerOne, "Single-use cart apples", 4);
         long cartItemId = addCartItem(product.getId(), 1);

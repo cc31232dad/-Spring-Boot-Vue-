@@ -126,11 +126,22 @@ public class OrderService {
                     product.getOriginPlace(), product.getPrice(), cartItem.getQuantity());
             orderItemMapper.insert(item);
             if (productMapper.deductStock(product.getId(), cartItem.getQuantity()) != 1) {
-                throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
+                throw deductionFailure(product.getId());
             }
             return item;
         }).toList();
         return toView(order, items);
+    }
+
+    private BusinessException deductionFailure(Long productId) {
+        Product product = productMapper.selectById(productId);
+        if (product == null) {
+            return new BusinessException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+        if (!ProductStatus.ON_SALE.name().equals(product.getStatus())) {
+            return new BusinessException(ErrorCode.PRODUCT_UNAVAILABLE);
+        }
+        return new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
     }
 
     private Map<Long, Product> productsById(List<CartItem> cartItems) {
