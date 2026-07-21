@@ -8,6 +8,7 @@ const isLoading = ref(true)
 const loadError = ref('')
 const actionError = ref('')
 const changingOrderId = ref<number | null>(null)
+const actionErrorOrderId = ref<number | null>(null)
 
 const statusLabels: Record<OrderStatus, string> = {
   PENDING_SHIPMENT: 'Waiting for shipment',
@@ -32,11 +33,13 @@ async function loadOrders() {
 
 async function updateOrder(id: number, action: 'cancel' | 'complete') {
   actionError.value = ''
+  actionErrorOrderId.value = null
   changingOrderId.value = id
   try {
     await orderStore[action](id)
   } catch {
     actionError.value = 'The order could not be updated. Please try again.'
+    actionErrorOrderId.value = id
   } finally {
     changingOrderId.value = null
   }
@@ -84,7 +87,7 @@ async function updateOrder(id: number, action: 'cancel' | 'complete') {
           </li>
         </ul>
         <footer class="order-card-footer">
-          <p v-if="actionError && changingOrderId === order.id" class="form-error" role="alert">{{ actionError }}</p>
+          <p v-if="actionError && actionErrorOrderId === order.id" class="form-error" role="alert">{{ actionError }}</p>
           <button v-if="order.status === 'PENDING_SHIPMENT'" class="secondary-button" type="button" :disabled="changingOrderId === order.id" @click="updateOrder(order.id, 'cancel')">{{ changingOrderId === order.id ? 'Cancelling...' : 'Cancel order' }}</button>
           <button v-else-if="order.status === 'SHIPPED'" type="button" :disabled="changingOrderId === order.id" @click="updateOrder(order.id, 'complete')">{{ changingOrderId === order.id ? 'Confirming...' : 'Confirm delivery' }}</button>
         </footer>
