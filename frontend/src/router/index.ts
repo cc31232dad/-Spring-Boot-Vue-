@@ -6,6 +6,9 @@ import LoginView from '../views/auth/LoginView.vue'
 import RegisterView from '../views/auth/RegisterView.vue'
 import ProductFormView from '../views/farmer/ProductFormView.vue'
 import CartView from '../views/CartView.vue'
+import OrderListView from '../views/OrderListView.vue'
+import FarmerOrdersView from '../views/farmer/FarmerOrdersView.vue'
+import AdminOrdersView from '../views/admin/AdminOrdersView.vue'
 
 const router = createRouter({
   history: typeof window === 'undefined' ? createMemoryHistory() : createWebHistory(),
@@ -13,6 +16,9 @@ const router = createRouter({
     { path: '/', name: 'home', component: HomeView },
     { path: '/products/:id', name: 'product-detail', component: ProductDetailView },
     { path: '/cart', name: 'cart', component: CartView, meta: { requiresAuth: true } },
+    { path: '/orders', name: 'orders', component: OrderListView, meta: { requiresAuth: true } },
+    { path: '/farmer/orders', name: 'farmer-orders', component: FarmerOrdersView, meta: { requiresAuth: true } },
+    { path: '/admin/orders', name: 'admin-orders', component: AdminOrdersView, meta: { requiresAuth: true } },
     {
       path: '/farmer/products/new',
       name: 'farmer-product-new',
