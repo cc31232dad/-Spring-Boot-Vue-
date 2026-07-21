@@ -15,6 +15,25 @@ const quantity = ref(1)
 const addError = ref('')
 const isAdding = ref(false)
 
+function normalizedQuantity() {
+  if (!product.value) return null
+
+  const requestedQuantity = Number(quantity.value)
+  if (!Number.isInteger(requestedQuantity) || requestedQuantity < 1) {
+    quantity.value = 1
+    addError.value = '购买数量至少为 1。'
+    return null
+  }
+
+  if (requestedQuantity > product.value.stock) {
+    quantity.value = product.value.stock
+    addError.value = '购买数量不能超过当前库存。'
+    return null
+  }
+
+  return requestedQuantity
+}
+
 onMounted(async () => {
   try {
     product.value = await getProduct(Number(route.params.id))
@@ -26,16 +45,19 @@ onMounted(async () => {
 async function addToCart() {
   if (!product.value) return
 
+  addError.value = ''
+  const requestedQuantity = normalizedQuantity()
+  if (requestedQuantity === null) return
+
   if (!auth.isLoggedIn) {
     await router.push({ name: 'login', query: { redirect: route.fullPath } })
     return
   }
 
-  addError.value = ''
   isAdding.value = true
 
   try {
-    await cartStore.addItem({ productId: product.value.id, quantity: quantity.value })
+    await cartStore.addItem({ productId: product.value.id, quantity: requestedQuantity })
     await router.push({ name: 'cart' })
   } catch {
     addError.value = '加入购物车失败，请确认库存后重试。'

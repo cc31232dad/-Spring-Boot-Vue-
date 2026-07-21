@@ -34,8 +34,22 @@ async function loadCart() {
   }
 }
 
-async function changeQuantity(id: number, quantity: number) {
-  if (quantity < 1) return
+async function changeQuantity(id: number, quantity: number, event: Event) {
+  const item = cartStore.items.find((cartItem) => cartItem.id === id)
+  const input = event.target as HTMLInputElement
+  if (!item) return
+
+  if (!Number.isInteger(quantity) || quantity < 1) {
+    input.value = String(item.quantity)
+    return
+  }
+
+  if (quantity > item.stock) {
+    input.value = String(item.quantity)
+    actionError.value = '购买数量不能超过当前库存。'
+    return
+  }
+
   actionError.value = ''
   changingItemId.value = id
   try {
@@ -69,7 +83,9 @@ async function checkout() {
       ...receiver
     })
     await cartStore.loadCart()
-    await router.push({ name: 'orders' })
+    if (router.hasRoute('orders')) {
+      await router.push({ name: 'orders' })
+    }
   } catch {
     actionError.value = '结算未完成，请检查收货信息或稍后重试。'
   } finally {
@@ -108,7 +124,7 @@ async function checkout() {
           <div class="cart-item-actions">
             <label class="quantity-control">
               <span class="sr-only">{{ item.productName }} 数量</span>
-              <input :value="item.quantity" type="number" min="1" :max="item.stock" :disabled="changingItemId === item.id" @change="changeQuantity(item.id, Number(($event.target as HTMLInputElement).value))" />
+              <input :value="item.quantity" type="number" min="1" :max="item.stock" :disabled="changingItemId === item.id" @change="changeQuantity(item.id, Number(($event.target as HTMLInputElement).value), $event)" />
             </label>
             <strong>¥{{ item.subtotal }}</strong>
             <button class="text-button" type="button" :disabled="changingItemId === item.id" @click="removeItem(item.id)">移除</button>
