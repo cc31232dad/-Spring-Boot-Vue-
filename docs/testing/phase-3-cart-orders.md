@@ -1,6 +1,6 @@
 # Phase 3 cart and normal orders acceptance
 
-Test date: 2026-07-19
+Latest verified: 2026-07-21
 
 ## Automated commands
 
@@ -14,6 +14,14 @@ npm run build
 ```
 
 `OrderFlowIntegrationTest` covers shopper registration and login, two farmer-owned products in one cart, cross-farmer checkout into two orders, stock deduction, farmer shipment, shopper completion, and cancellation with stock restoration.
+
+Latest command evidence:
+
+- `cd backend && mvn -Dtest=OrderCheckoutApiTest test`: 10 tests, 0 failures, 0 errors.
+- `cd backend && mvn -Dtest=OrderFlowIntegrationTest test`: 1 test, 0 failures, 0 errors.
+- `cd backend && mvn clean verify`: 58 tests, 0 failures, 0 errors.
+- `cd frontend && npm run test -- --run`: 4 files, 9 tests passed.
+- `cd frontend && npm run build`: production build completed.
 
 ## Manual checklist
 

@@ -33,10 +33,10 @@ Verification: see `docs/testing/phase-2-product-catalog.md`.
 
 ## Phase 3: cart and normal orders
 
-Completed: cart, checkout, stock deduction, farmer-scoped orders, shopper/farmer/admin order pages.
+Completed: cart, checkout, stock deduction, farmer-scoped orders, shopper/farmer/admin order pages, acceptance test and testing handoff.
 Deferred: payment, seckill, logistics, refunds, coupons, reviews.
-Problems encountered: the initial acceptance test used a regular expression that could not safely extract an order ID from a multi-order checkout response; it was replaced with JSON tree traversal. The full backend suite currently has four failures in the pre-existing `OrderCheckoutApiTest` for the same order-ID-versus-order-item-ID regex issue when database auto-increment values diverge. Maven also reports Mockito dynamic-agent warnings on JDK 21.
-Verification: see `docs/testing/phase-3-cart-orders.md`.
+Problems encountered: early test helpers used regular expressions to extract `"id"` from nested JSON responses. This was fragile because checkout responses include both order IDs and order-item IDs, and cart add responses include the whole cart list. Helpers were replaced with Jackson JSON tree traversal: checkout reads the first order ID directly and cart item lookup matches by `productId`. Maven also reports Mockito dynamic-agent warnings on JDK 21; current tests still pass.
+Verification: see `docs/testing/phase-3-cart-orders.md`; latest full checks passed on 2026-07-21.
 
 ## Recommended next phases
 

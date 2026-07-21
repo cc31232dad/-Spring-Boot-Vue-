@@ -1,5 +1,7 @@
 package com.agromall.order;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.agromall.order.infrastructure.OrderMapper;
 import com.agromall.product.domain.Product;
 import com.agromall.product.infrastructure.ProductMapper;
@@ -39,6 +41,7 @@ class OrderCheckoutApiTest {
     @Autowired private UserMapper userMapper;
     @Autowired private ProductMapper productMapper;
     @Autowired private OrderMapper orderMapper;
+    @Autowired private ObjectMapper objectMapper;
 
     private String buyerToken;
     private User farmerOne;
@@ -248,7 +251,7 @@ class OrderCheckoutApiTest {
                         .content("{\"productId\":%d,\"quantity\":%d}".formatted(productId, quantity)))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
-        return Long.parseLong(response.replaceFirst(".*\\\"id\\\"\\s*:\\s*(\\d+).*", "$1"));
+        return readCartItemId(response, productId);
     }
 
     private String checkoutBody(long... cartItemIds) {
@@ -264,6 +267,27 @@ class OrderCheckoutApiTest {
                         .content(checkoutBody(cartItemId)))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
-        return Long.parseLong(response.replaceFirst(".*\\\"id\\\"\\s*:\\s*(\\d+).*", "$1"));
+        return readLong(response, "/data/0/id");
+    }
+
+    private long readLong(String response, String jsonPointer) throws Exception {
+        JsonNode node = objectMapper.readTree(response).at(jsonPointer);
+        assertThat(node.isNumber())
+                .as("Expected numeric JSON value at %s in response %s", jsonPointer, response)
+                .isTrue();
+        return node.asLong();
+    }
+
+    private long readCartItemId(String response, Long productId) throws Exception {
+        JsonNode items = objectMapper.readTree(response).at("/data/items");
+        assertThat(items.isArray())
+                .as("Expected cart items array in response %s", response)
+                .isTrue();
+        for (JsonNode item : items) {
+            if (item.path("productId").asLong() == productId) {
+                return item.path("id").asLong();
+            }
+        }
+        throw new AssertionError("Expected cart item for product %d in response %s".formatted(productId, response));
     }
 }
