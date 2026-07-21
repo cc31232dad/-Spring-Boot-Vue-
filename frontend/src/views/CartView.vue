@@ -82,12 +82,21 @@ async function checkout() {
       cartItemIds: cartStore.items.map((item) => item.id),
       ...receiver
     })
+  } catch {
+    actionError.value = '结算未完成，请检查收货信息或稍后重试。'
+    isCheckingOut.value = false
+    return
+  }
+
+  try {
     await cartStore.loadCart()
     if (router.hasRoute('orders')) {
       await router.push({ name: 'orders' })
     }
   } catch {
-    actionError.value = '结算未完成，请检查收货信息或稍后重试。'
+    cartStore.items = []
+    cartStore.totalAmount = 0
+    actionError.value = '订单已提交，但页面刷新失败。请稍后到我的订单中查看。'
   } finally {
     isCheckingOut.value = false
   }
