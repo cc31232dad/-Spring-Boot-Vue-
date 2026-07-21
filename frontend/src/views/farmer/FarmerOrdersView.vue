@@ -7,7 +7,7 @@ const orderStore = useOrderStore()
 const isLoading = ref(true)
 const loadError = ref('')
 const actionError = ref('')
-const shippingOrderId = ref<number | null>(null)
+const shippingOrderIds = ref(new Set<number>())
 const actionErrorOrderId = ref<number | null>(null)
 
 const statusLabels: Record<OrderStatus, string> = {
@@ -32,16 +32,19 @@ async function loadOrders() {
 }
 
 async function shipOrder(id: number) {
+  if (shippingOrderIds.value.has(id)) return
   actionError.value = ''
   actionErrorOrderId.value = null
-  shippingOrderId.value = id
+  shippingOrderIds.value = new Set(shippingOrderIds.value).add(id)
   try {
     await orderStore.ship(id)
   } catch {
     actionError.value = 'The shipment could not be updated. Please try again.'
     actionErrorOrderId.value = id
   } finally {
-    shippingOrderId.value = null
+    const nextIds = new Set(shippingOrderIds.value)
+    nextIds.delete(id)
+    shippingOrderIds.value = nextIds
   }
 }
 </script>
@@ -63,7 +66,7 @@ async function shipOrder(id: number) {
         <div class="order-card-topline"><div><p class="eyebrow">Order {{ order.orderNo }}</p><p class="order-role">Buyer #{{ order.buyerId }}</p></div><span class="order-status" :class="`status-${order.status.toLowerCase()}`">{{ statusLabels[order.status] }}</span></div>
         <div class="order-card-details"><div class="order-receiver"><strong>Deliver to</strong><span>{{ order.receiverName }} · {{ order.receiverPhone }}</span><span>{{ order.receiverAddress }}</span></div><strong class="order-total">¥{{ order.totalAmount }}</strong></div>
         <ul class="order-item-list"><li v-for="item in order.items" :key="item.id" class="order-item"><img :src="item.productImageUrl" :alt="item.productName" /><div><strong>{{ item.productName }}</strong><span>{{ item.originPlace }} · {{ item.quantity }} item{{ item.quantity === 1 ? '' : 's' }}</span></div><strong>¥{{ item.subtotal }}</strong></li></ul>
-        <footer class="order-card-footer"><p v-if="actionError && actionErrorOrderId === order.id" class="form-error" role="alert">{{ actionError }}</p><button v-if="order.status === 'PENDING_SHIPMENT'" type="button" :disabled="shippingOrderId === order.id" @click="shipOrder(order.id)">{{ shippingOrderId === order.id ? 'Marking shipped...' : 'Mark as shipped' }}</button></footer>
+        <footer class="order-card-footer"><p v-if="actionError && actionErrorOrderId === order.id" class="form-error" role="alert">{{ actionError }}</p><button v-if="order.status === 'PENDING_SHIPMENT'" type="button" :disabled="shippingOrderIds.has(order.id)" @click="shipOrder(order.id)">{{ shippingOrderIds.has(order.id) ? 'Marking shipped...' : 'Mark as shipped' }}</button></footer>
       </article>
     </section>
   </main>

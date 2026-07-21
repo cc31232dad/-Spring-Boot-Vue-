@@ -7,7 +7,7 @@ const orderStore = useOrderStore()
 const isLoading = ref(true)
 const loadError = ref('')
 const actionError = ref('')
-const changingOrderId = ref<number | null>(null)
+const changingOrderIds = ref(new Set<number>())
 const actionErrorOrderId = ref<number | null>(null)
 
 const statusLabels: Record<OrderStatus, string> = {
@@ -32,16 +32,19 @@ async function loadOrders() {
 }
 
 async function updateOrder(id: number, action: 'cancel' | 'complete') {
+  if (changingOrderIds.value.has(id)) return
   actionError.value = ''
   actionErrorOrderId.value = null
-  changingOrderId.value = id
+  changingOrderIds.value = new Set(changingOrderIds.value).add(id)
   try {
     await orderStore[action](id)
   } catch {
     actionError.value = 'The order could not be updated. Please try again.'
     actionErrorOrderId.value = id
   } finally {
-    changingOrderId.value = null
+    const nextIds = new Set(changingOrderIds.value)
+    nextIds.delete(id)
+    changingOrderIds.value = nextIds
   }
 }
 </script>
@@ -88,8 +91,8 @@ async function updateOrder(id: number, action: 'cancel' | 'complete') {
         </ul>
         <footer class="order-card-footer">
           <p v-if="actionError && actionErrorOrderId === order.id" class="form-error" role="alert">{{ actionError }}</p>
-          <button v-if="order.status === 'PENDING_SHIPMENT'" class="secondary-button" type="button" :disabled="changingOrderId === order.id" @click="updateOrder(order.id, 'cancel')">{{ changingOrderId === order.id ? 'Cancelling...' : 'Cancel order' }}</button>
-          <button v-else-if="order.status === 'SHIPPED'" type="button" :disabled="changingOrderId === order.id" @click="updateOrder(order.id, 'complete')">{{ changingOrderId === order.id ? 'Confirming...' : 'Confirm delivery' }}</button>
+          <button v-if="order.status === 'PENDING_SHIPMENT'" class="secondary-button" type="button" :disabled="changingOrderIds.has(order.id)" @click="updateOrder(order.id, 'cancel')">{{ changingOrderIds.has(order.id) ? 'Cancelling...' : 'Cancel order' }}</button>
+          <button v-else-if="order.status === 'SHIPPED'" type="button" :disabled="changingOrderIds.has(order.id)" @click="updateOrder(order.id, 'complete')">{{ changingOrderIds.has(order.id) ? 'Confirming...' : 'Confirm delivery' }}</button>
         </footer>
       </article>
     </section>
