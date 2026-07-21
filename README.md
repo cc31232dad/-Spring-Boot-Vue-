@@ -1,6 +1,6 @@
 # Agricultural Mall
 
-Phase 1 provides account registration, login, JWT session recovery, and role-based API access. Phase 2 adds the product catalog, including public browsing and farmer/admin product management.
+Phase 1 provides account registration, login, JWT session recovery, and role-based API access. Phase 2 adds the product catalog, including public browsing and farmer/admin product management. Phase 3 adds cart management and normal orders, including farmer-split checkout and order status workflows.
 
 ## Prerequisites
 
@@ -57,6 +57,8 @@ npm run build
 ```
 
 For the Phase 2 product catalog acceptance flow and browser checklist, see [docs/testing/phase-2-product-catalog.md](docs/testing/phase-2-product-catalog.md).
+
+For the Phase 3 cart and normal orders acceptance flow and browser checklist, see [docs/testing/phase-3-cart-orders.md](docs/testing/phase-3-cart-orders.md).
 
 ## Security notes
 
