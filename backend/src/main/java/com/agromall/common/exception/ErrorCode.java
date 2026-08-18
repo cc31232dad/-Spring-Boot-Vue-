@@ -13,6 +13,13 @@ public enum ErrorCode {
     INSUFFICIENT_STOCK(1010, "Insufficient stock"),
     ORDER_NOT_FOUND(1011, "Order not found"),
     INVALID_ORDER_STATUS(1012, "Invalid order status"),
+    SECKILL_ACTIVITY_NOT_FOUND(1013, "Seckill activity not found"),
+    SECKILL_NOT_STARTED(1014, "Seckill activity has not started"),
+    SECKILL_ENDED(1015, "Seckill activity has ended"),
+    SECKILL_SOLD_OUT(1016, "Seckill activity is sold out"),
+    SECKILL_ALREADY_BOUGHT(1017, "User already bought this seckill item"),
+    SECKILL_NOT_PUBLISHABLE(1018, "Seckill activity cannot be published"),
+    SECKILL_ORDER_FAILED(1019, "Unable to create seckill order"),
     INTERNAL_ERROR(9999, "Internal server error");
 
     private final int code;
