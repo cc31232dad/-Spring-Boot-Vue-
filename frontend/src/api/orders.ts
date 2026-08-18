@@ -1,6 +1,6 @@
 import http from './http'
 
-export type OrderStatus = 'PENDING_SHIPMENT' | 'SHIPPED' | 'COMPLETED' | 'CANCELLED'
+export type OrderStatus = 'PENDING_PAYMENT' | 'PENDING_SHIPMENT' | 'SHIPPED' | 'COMPLETED' | 'CANCELLED'
 
 export interface CheckoutPayload {
   cartItemIds: number[]
@@ -26,6 +26,7 @@ export interface Order {
   buyerId: number
   farmerId: number
   status: OrderStatus
+  orderType: 'NORMAL' | 'SECKILL'
   totalAmount: number
   receiverName: string
   receiverPhone: string

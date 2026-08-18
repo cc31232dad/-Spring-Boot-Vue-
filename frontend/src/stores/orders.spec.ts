@@ -20,6 +20,7 @@ const order = {
   buyerId: 2,
   farmerId: 3,
   status: 'PENDING_SHIPMENT' as const,
+  orderType: 'NORMAL' as const,
   totalAmount: 25,
   receiverName: 'Alice',
   receiverPhone: '13800000000',

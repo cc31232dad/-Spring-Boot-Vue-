@@ -39,4 +39,11 @@ public class SeckillController {
                                       @PathVariable Long id, @Valid @RequestBody SeckillRequest request) {
         return ApiResponse.ok(service.rush(id, principal.userId(), request));
     }
+
+    @org.springframework.web.bind.annotation.PatchMapping("/{id}/cancel")
+    public ApiResponse<Void> cancel(@AuthenticationPrincipal JwtService.JwtPrincipal principal,
+                                    @PathVariable Long id) {
+        service.cancel(id, principal.userId());
+        return ApiResponse.ok(null);
+    }
 }

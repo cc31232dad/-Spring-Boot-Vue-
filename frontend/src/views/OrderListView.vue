@@ -11,6 +11,7 @@ const changingOrderIds = ref(new Set<number>())
 const actionErrorOrderId = ref<number | null>(null)
 
 const statusLabels: Record<OrderStatus, string> = {
+  PENDING_PAYMENT: '待支付',
   PENDING_SHIPMENT: 'Waiting for shipment',
   SHIPPED: 'On the way',
   COMPLETED: 'Completed',

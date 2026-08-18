@@ -40,6 +40,13 @@ Verification: see `docs/testing/phase-3-cart-orders.md`; latest full checks pass
 
 ## Recommended next phases
 
-1. Phase 4: seckill with Redis stock pre-deduction.
-2. Phase 5: Alipay sandbox payment.
-3. Phase 6: logistics, reviews, admin statistics, and UI polish.
+## Phase 4: Redis seckill
+
+Implemented: seckill activity schema, Redis stock warmup, Lua atomic reservation, one-user-one-order protection, seckill order creation, Redis compensation, cancellation and timeout recovery, and frontend activity/rush page.
+Deferred: real payment integration and production Redis concurrency verification.
+Verification: see `docs/testing/phase-4-seckill.md`.
+
+## Recommended next phases
+
+1. Phase 5: Alipay sandbox payment.
+2. Phase 6: logistics, reviews, admin statistics, and UI polish.

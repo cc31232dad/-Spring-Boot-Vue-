@@ -50,6 +50,10 @@ public class SeckillRedisReservation {
         redis.opsForSet().remove(buyersKey(activityId), userId.toString());
     }
 
+    public void release(Long activityId, Long userId) {
+        compensate(activityId, userId);
+    }
+
     public String stockKey(Long activityId) {
         return "seckill:stock:" + activityId;
     }

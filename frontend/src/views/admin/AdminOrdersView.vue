@@ -8,6 +8,7 @@ const isLoading = ref(true)
 const loadError = ref('')
 
 const statusLabels: Record<OrderStatus, string> = {
+  PENDING_PAYMENT: '待支付',
   PENDING_SHIPMENT: 'Waiting for shipment',
   SHIPPED: 'Shipped',
   COMPLETED: 'Completed',

@@ -81,6 +81,7 @@ async function logout() {
         </span>
       </RouterLink>
       <div class="account-actions">
+        <RouterLink class="secondary-link" :to="{ name: 'seckill' }">秒杀专区</RouterLink>
         <template v-if="auth.isLoggedIn">
           <span class="account-name">你好，{{ auth.username || '农友' }}</span>
           <button class="secondary-button" type="button" @click="logout">退出登录</button>

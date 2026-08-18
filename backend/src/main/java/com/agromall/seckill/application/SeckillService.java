@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ThreadLocalRandom;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
 @Service
 public class SeckillService {
@@ -139,6 +140,25 @@ public class SeckillService {
             throw new BusinessException(ErrorCode.SECKILL_ENDED);
         }
         reservation.reserve(activityId, userId);
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    public void cancel(Long activityId, Long userId) {
+        SeckillOrder seckillOrder = seckillOrderMapper.selectOne(new LambdaQueryWrapper<SeckillOrder>()
+                .eq(SeckillOrder::getActivityId, activityId).eq(SeckillOrder::getBuyerId, userId));
+        if (seckillOrder == null || orderMapper.markCancelledIfAwaitingPayment(seckillOrder.getOrderId()) != 1) {
+            throw new BusinessException(ErrorCode.INVALID_ORDER_STATUS);
+        }
+        reservation.release(activityId, userId);
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    public void cancelExpired() {
+        for (SeckillOrder seckillOrder : seckillOrderMapper.selectExpired(LocalDateTime.now().minusMinutes(15))) {
+            if (orderMapper.markCancelledIfAwaitingPayment(seckillOrder.getOrderId()) == 1) {
+                reservation.release(seckillOrder.getActivityId(), seckillOrder.getBuyerId());
+            }
+        }
     }
 
     private String nextOrderNo() {
