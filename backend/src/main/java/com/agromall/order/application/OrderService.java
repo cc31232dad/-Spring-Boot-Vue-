@@ -209,7 +209,7 @@ public class OrderService {
                 item.getProductName(), item.getProductImageUrl(), item.getOriginPlace(), item.getUnitPrice(),
                 item.getQuantity(), item.getSubtotal())).toList();
         return new OrderView(order.getId(), order.getOrderNo(), order.getBuyerId(), order.getFarmerId(),
-                order.getStatus(), order.getTotalAmount(), order.getReceiverName(), order.getReceiverPhone(),
+                order.getStatus(), order.getOrderType(), order.getTotalAmount(), order.getReceiverName(), order.getReceiverPhone(),
                 order.getReceiverAddress(), views);
     }
 

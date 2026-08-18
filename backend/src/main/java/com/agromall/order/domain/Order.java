@@ -43,4 +43,12 @@ public class Order {
         order.receiverAddress = receiverAddress;
         return order;
     }
+
+    public static Order createSeckill(String orderNo, Long buyerId, Long farmerId, BigDecimal totalAmount,
+                                      String receiverName, String receiverPhone, String receiverAddress) {
+        Order order = create(orderNo, buyerId, farmerId, totalAmount, receiverName, receiverPhone, receiverAddress);
+        order.status = OrderStatus.PENDING_PAYMENT.name();
+        order.orderType = "SECKILL";
+        return order;
+    }
 }
