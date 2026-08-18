@@ -10,6 +10,12 @@ import OrderListView from '../views/OrderListView.vue'
 import FarmerOrdersView from '../views/farmer/FarmerOrdersView.vue'
 import AdminOrdersView from '../views/admin/AdminOrdersView.vue'
 import SeckillView from '../views/SeckillView.vue'
+import UserLayout from '../views/user/UserLayout.vue'
+import UserOverviewView from '../views/user/UserOverviewView.vue'
+import UserOrdersView from '../views/user/UserOrdersView.vue'
+import UserAddressView from '../views/user/UserAddressView.vue'
+import UserFavoritesView from '../views/user/UserFavoritesView.vue'
+import UserSettingsView from '../views/user/UserSettingsView.vue'
 
 const router = createRouter({
   history: typeof window === 'undefined' ? createMemoryHistory() : createWebHistory(),
@@ -19,6 +25,13 @@ const router = createRouter({
     { path: '/cart', name: 'cart', component: CartView, meta: { requiresAuth: true } },
     { path: '/orders', name: 'orders', component: OrderListView, meta: { requiresAuth: true } },
     { path: '/seckill', name: 'seckill', component: SeckillView },
+    { path: '/user', component: UserLayout, meta: { requiresAuth: true }, children: [
+      { path: '', name: 'user', component: UserOverviewView },
+      { path: 'orders', name: 'user-orders', component: UserOrdersView },
+      { path: 'address', name: 'user-address', component: UserAddressView },
+      { path: 'favorites', name: 'user-favorites', component: UserFavoritesView },
+      { path: 'settings', name: 'user-settings', component: UserSettingsView }
+    ] },
     { path: '/farmer/orders', name: 'farmer-orders', component: FarmerOrdersView, meta: { requiresAuth: true } },
     { path: '/admin/orders', name: 'admin-orders', component: AdminOrdersView, meta: { requiresAuth: true } },
     {
