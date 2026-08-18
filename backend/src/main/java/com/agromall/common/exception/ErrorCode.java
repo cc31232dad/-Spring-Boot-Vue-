@@ -20,6 +20,9 @@ public enum ErrorCode {
     SECKILL_ALREADY_BOUGHT(1017, "User already bought this seckill item"),
     SECKILL_NOT_PUBLISHABLE(1018, "Seckill activity cannot be published"),
     SECKILL_ORDER_FAILED(1019, "Unable to create seckill order"),
+    ADDRESS_NOT_FOUND(1020, "Address not found"),
+    FAVORITE_NOT_FOUND(1021, "Favorite not found"),
+    USER_NOT_FOUND(1022, "User not found"),
     INTERNAL_ERROR(9999, "Internal server error");
 
     private final int code;

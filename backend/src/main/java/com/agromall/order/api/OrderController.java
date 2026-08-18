@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -30,8 +31,12 @@ public class OrderController {
     }
 
     @GetMapping("/api/orders/my")
-    public ApiResponse<List<OrderView>> myOrders(@AuthenticationPrincipal JwtService.JwtPrincipal principal) {
-        return ApiResponse.ok(orderService.getMyOrders(principal.userId()));
+    public ApiResponse<List<OrderView>> myOrders(@AuthenticationPrincipal JwtService.JwtPrincipal principal,
+                                                 @RequestParam(required = false) String status,
+                                                 @RequestParam(required = false) Integer page,
+                                                 @RequestParam(required = false) Integer size) {
+        return ApiResponse.ok(orderService.getMyOrders(principal.userId(), status,
+                page == null ? 0 : page, size == null ? Integer.MAX_VALUE : size));
     }
 
     @GetMapping("/api/orders/{id}")
@@ -46,9 +51,21 @@ public class OrderController {
         return ApiResponse.ok(orderService.cancel(principal.userId(), id));
     }
 
+    @PostMapping("/api/orders/{id}/cancel")
+    public ApiResponse<OrderView> cancelPost(@AuthenticationPrincipal JwtService.JwtPrincipal principal,
+                                             @PathVariable Long id) {
+        return ApiResponse.ok(orderService.cancel(principal.userId(), id));
+    }
+
     @PatchMapping("/api/orders/{id}/complete")
     public ApiResponse<OrderView> complete(@AuthenticationPrincipal JwtService.JwtPrincipal principal,
                                            @PathVariable Long id) {
+        return ApiResponse.ok(orderService.complete(principal.userId(), id));
+    }
+
+    @PostMapping("/api/orders/{id}/confirm")
+    public ApiResponse<OrderView> confirm(@AuthenticationPrincipal JwtService.JwtPrincipal principal,
+                                          @PathVariable Long id) {
         return ApiResponse.ok(orderService.complete(principal.userId(), id));
     }
 

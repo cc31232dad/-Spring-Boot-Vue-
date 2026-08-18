@@ -75,10 +75,31 @@ public class OrderService {
     }
 
     public List<OrderView> getMyOrders(Long buyerId) {
-        return orderMapper.selectList(new LambdaQueryWrapper<Order>()
-                        .eq(Order::getBuyerId, buyerId)
-                        .orderByDesc(Order::getCreatedAt))
+        return getMyOrders(buyerId, null, 0, Integer.MAX_VALUE);
+    }
+
+    public List<OrderView> getMyOrders(Long buyerId, String status, int page, int size) {
+        String normalizedStatus = normalizeStatus(status);
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.min(Math.max(size, 1), 100);
+        LambdaQueryWrapper<Order> query = new LambdaQueryWrapper<Order>().eq(Order::getBuyerId, buyerId)
+                .orderByDesc(Order::getCreatedAt);
+        if (normalizedStatus != null) query.eq(Order::getStatus, normalizedStatus);
+        if (size != Integer.MAX_VALUE) query.last("LIMIT " + safeSize + " OFFSET " + (long) safePage * safeSize);
+        return orderMapper.selectList(query)
                 .stream().map(this::toView).toList();
+    }
+
+    private String normalizeStatus(String status) {
+        if (status == null || status.isBlank() || "all".equalsIgnoreCase(status)) return null;
+        return switch (status.toLowerCase()) {
+            case "wait", "pending_payment" -> OrderStatus.PENDING_PAYMENT.name();
+            case "ship", "shipped" -> OrderStatus.SHIPPED.name();
+            case "pending_shipment" -> OrderStatus.PENDING_SHIPMENT.name();
+            case "done", "completed" -> OrderStatus.COMPLETED.name();
+            case "cancelled", "canceled" -> OrderStatus.CANCELLED.name();
+            default -> status.toUpperCase();
+        };
     }
 
     public OrderView getMyOrder(Long buyerId, Long orderId) {

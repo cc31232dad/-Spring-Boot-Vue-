@@ -43,7 +43,7 @@ public class GlobalExceptionHandler {
             case FORBIDDEN -> HttpStatus.FORBIDDEN;
             case VALIDATION_ERROR -> HttpStatus.BAD_REQUEST;
             case PRODUCT_NOT_FOUND, CATEGORY_NOT_FOUND, CART_ITEM_NOT_FOUND, ORDER_NOT_FOUND,
-                 SECKILL_ACTIVITY_NOT_FOUND -> HttpStatus.NOT_FOUND;
+                 SECKILL_ACTIVITY_NOT_FOUND, ADDRESS_NOT_FOUND, FAVORITE_NOT_FOUND, USER_NOT_FOUND -> HttpStatus.NOT_FOUND;
             case INTERNAL_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
             default -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
