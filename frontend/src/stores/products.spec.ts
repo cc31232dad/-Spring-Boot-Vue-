@@ -48,4 +48,36 @@ describe('product store', () => {
     expect(store.categoryId).toBeUndefined()
     expect(api.listProducts).toHaveBeenLastCalledWith({ keyword: undefined, categoryId: undefined })
   })
+
+  it('uses the demo catalog when the backend catalog is empty', async () => {
+    vi.mocked(api.listCategories).mockResolvedValue([])
+    vi.mocked(api.listProducts).mockResolvedValue([])
+    const store = useProductStore()
+
+    await store.loadCatalog()
+
+    expect(store.isUsingMockData).toBe(true)
+    expect(store.products.length).toBeGreaterThan(10)
+    expect(store.products[0].originPlace).toBeTruthy()
+  })
+
+  it('keeps real catalog data ahead of demo products', async () => {
+    vi.mocked(api.listCategories).mockResolvedValue([{ id: 1, name: '水果' }])
+    vi.mocked(api.listProducts).mockResolvedValue([{
+      id: 9,
+      name: '真实商品',
+      price: 9.9,
+      stock: 8,
+      originPlace: '本地',
+      imageUrl: 'https://example.com/real.jpg',
+      categoryId: 1,
+      categoryName: '水果'
+    }])
+    const store = useProductStore()
+
+    await store.loadCatalog()
+
+    expect(store.isUsingMockData).toBe(false)
+    expect(store.products).toHaveLength(1)
+  })
 })
