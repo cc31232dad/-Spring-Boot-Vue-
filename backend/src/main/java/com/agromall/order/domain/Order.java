@@ -20,6 +20,7 @@ public class Order {
     private String orderNo;
     private Long buyerId;
     private Long farmerId;
+    private String orderType;
     private String status;
     private BigDecimal totalAmount;
     private String receiverName;
@@ -34,6 +35,7 @@ public class Order {
         order.orderNo = orderNo;
         order.buyerId = buyerId;
         order.farmerId = farmerId;
+        order.orderType = "NORMAL";
         order.status = OrderStatus.PENDING_SHIPMENT.name();
         order.totalAmount = totalAmount;
         order.receiverName = receiverName;
