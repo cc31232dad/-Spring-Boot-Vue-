@@ -56,7 +56,7 @@ a { color: var(--leaf-green); font-weight: 700; }
 .account-actions { display: flex; align-items: center; gap: 12px; }
 .account-name { color: var(--muted-ink); font-size: .92rem; }
 .user-dropdown { position: relative; z-index: 3; }
-.user-dropdown summary { display: flex; align-items: center; gap: 7px; padding: 7px 10px; border: 1px solid var(--input-border); border-radius: 8px; color: var(--soil-ink); background: #fff; cursor: pointer; list-style: none; }
+.user-dropdown summary { display: flex; align-items: center; gap: 7px; min-height: 44px; padding: 0 18px; border: 1px solid var(--leaf-green); border-radius: 6px; color: var(--soil-ink); background: transparent; cursor: pointer; list-style: none; }
 .user-dropdown summary::-webkit-details-marker { display: none; }
 .user-dropdown summary i { min-width: 16px; padding: 2px 5px; border-radius: 999px; color: #fff; background: #e85d04; font-size: .68rem; font-style: normal; text-align: center; }
 .dropdown-menu { position: absolute; right: 0; top: calc(100% + 8px); display: grid; width: 155px; padding: 7px; border: 1px solid var(--input-border); border-radius: 10px; background: #fff; box-shadow: 0 12px 28px rgba(38,54,43,.16); }
@@ -112,6 +112,7 @@ a { color: var(--leaf-green); font-weight: 700; }
 .user-sidebar nav { display: grid; gap: 4px; padding-top: 14px; }
 .user-sidebar nav a { padding: 11px 10px; border-radius: 7px; color: var(--muted-ink); font-size: .9rem; text-decoration: none; }
 .user-sidebar nav a.router-link-active { color: var(--leaf-green-deep); background: #edf5e6; }
+.user-back-link { display: inline-flex; margin: 0 0 18px 10px; color: var(--leaf-green); font-size: .84rem; text-decoration: none; }
 .user-content { min-width: 0; }
 .user-heading, .panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 22px; }
 .user-heading h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
