@@ -104,7 +104,7 @@ a { color: var(--leaf-green); font-weight: 700; }
 .card-action { display: block; margin-top: 10px; color: var(--leaf-green); font-size: .8rem; font-weight: 750; }
 .user-page { min-height: 100vh; padding: var(--page-padding); }
 .user-shell { display: grid; grid-template-columns: 200px minmax(0, 960px); gap: 28px; max-width: 1200px; margin: auto; }
-.user-sidebar { align-self: start; padding: 18px 12px; border: 1px solid rgba(47,125,74,.14); border-radius: 12px; background: #fff; }
+.user-sidebar { align-self: start; padding: 4px 0; border: 0; background: transparent; }
 .user-profile-mini { display: flex; align-items: center; gap: 9px; padding: 4px 7px 18px; border-bottom: 1px solid #e4ecdf; }
 .avatar-placeholder { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 50%; color: #fff; background: var(--leaf-green); font-weight: 800; }
 .avatar-placeholder.small { width: 26px; height: 26px; font-size: .72rem; }
@@ -120,7 +120,7 @@ a { color: var(--leaf-green); font-weight: 700; }
 .stat-card strong { font-size: 1.65rem; }
 .stat-card span { color: var(--muted-ink); font-size: .84rem; }
 .stat-card.orange strong { color: #e85d04; }.stat-card.blue strong { color: #2d6da3; }.stat-card.pink strong { color: #d14d72; }
-.user-panel { padding: 20px; border: 1px solid #e1e9dc; border-radius: 12px; background: #fff; }
+.user-panel { padding: 0; border: 0; border-radius: 0; background: transparent; }
 .panel-heading { margin-bottom: 12px; }.panel-heading h2, .settings-card h2 { margin: 0; font-size: 1.15rem; }
 .recent-order, .user-order, .address-card { display: grid; grid-template-columns: 56px minmax(0,1fr) auto auto; align-items: center; gap: 13px; padding: 13px 0; border-top: 1px solid #edf1eb; }
 .recent-order img, .user-order img { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; background: var(--field-mist); }
