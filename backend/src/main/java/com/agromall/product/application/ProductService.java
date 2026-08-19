@@ -7,6 +7,7 @@ import com.agromall.product.api.ProductCreateRequest;
 import com.agromall.product.api.ProductDetailView;
 import com.agromall.product.api.ProductSummaryView;
 import com.agromall.product.api.ProductUpdateRequest;
+import com.agromall.product.api.ProductReviewView;
 import com.agromall.product.domain.Product;
 import com.agromall.product.domain.ProductCategory;
 import com.agromall.product.domain.ProductStatus;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -99,6 +101,29 @@ public class ProductService {
         return toDetailView(product);
     }
 
+    public List<ProductReviewView> listReviewProducts(ProductStatus status) {
+        LambdaQueryWrapper<Product> wrapper = new LambdaQueryWrapper<Product>()
+                .eq(Product::getStatus, status.name())
+                .orderByDesc(Product::getCreatedAt);
+        return productMapper.selectList(wrapper).stream().map(this::toReviewView).toList();
+    }
+
+    public ProductReviewView approveProduct(Long reviewerId, Long productId) {
+        Product product = getProduct(productId);
+        assertPendingReview(product);
+        product.approve(reviewerId, LocalDateTime.now());
+        productMapper.updateById(product);
+        return toReviewView(product);
+    }
+
+    public ProductReviewView rejectProduct(Long reviewerId, Long productId, String reason) {
+        Product product = getProduct(productId);
+        assertPendingReview(product);
+        product.reject(reviewerId, LocalDateTime.now(), reason);
+        productMapper.updateById(product);
+        return toReviewView(product);
+    }
+
     private Product getProduct(Long productId) {
         Product product = productMapper.selectById(productId);
         if (product == null) {
@@ -113,6 +138,12 @@ public class ProductService {
         }
     }
 
+    private void assertPendingReview(Product product) {
+        if (!ProductStatus.PENDING_REVIEW.name().equals(product.getStatus())) {
+            throw new BusinessException(ErrorCode.PRODUCT_REVIEW_INVALID);
+        }
+    }
+
     private void assertCategoryExists(Long categoryId) {
         if (categoryMapper.selectById(categoryId) == null) {
             throw new BusinessException(ErrorCode.CATEGORY_NOT_FOUND);
@@ -124,6 +155,14 @@ public class ProductService {
         return new ProductDetailView(product.getId(), product.getCategoryId(), categoryName, product.getFarmerId(),
                 product.getName(), product.getDescription(), product.getPrice(), product.getStock(),
                 product.getOriginPlace(), product.getImageUrl(), product.getStatus());
+    }
+
+    private ProductReviewView toReviewView(Product product) {
+        String categoryName = categoryNames().get(product.getCategoryId());
+        return new ProductReviewView(product.getId(), product.getCategoryId(), categoryName, product.getFarmerId(),
+                product.getName(), product.getDescription(), product.getPrice(), product.getStock(),
+                product.getOriginPlace(), product.getImageUrl(), product.getStatus(), product.getReviewedBy(),
+                product.getReviewedAt(), product.getReviewReason());
     }
 
     private Map<Long, String> categoryNames() {

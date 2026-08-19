@@ -7,7 +7,7 @@
 
 项目已经具备真实后端，不是只有前端页面。已完成注册登录、JWT、USER/FARMER/ADMIN 权限、商品目录、农户商品创建/修改/上下架、商品审核状态基础、首页展示、购物车、普通订单、Redis Lua 秒杀、用户中心、收货地址、收藏列表和用户资料接口。
 
-P0-1 已完成：Flyway 已迁移到 V6，商品新增 `PENDING_REVIEW`、`REJECTED` 状态及审核字段；农户创建、修改和重新上架都会进入待审核，公开接口仍只返回 `ON_SALE`。完整后端 `mvn test` 通过 68 项。
+P0-1 已完成：Flyway 已迁移到 V6，商品新增 `PENDING_REVIEW`、`REJECTED` 状态及审核字段；农户创建、修改和重新上架都会进入待审核，公开接口仍只返回 `ON_SALE`。P0-2 后端审核 API 也已完成，完整后端 `mvn test` 通过 73 项。
 
 当前未跟踪的 `.vscode/` 目录不要提交。
 
@@ -15,11 +15,11 @@ P0-1 已完成：Flyway 已迁移到 V6，商品新增 `PENDING_REVIEW`、`REJEC
 
 ## 最大业务缺口
 
-目前管理员审核 HTTP API 和审核页面尚未接入，因此待审核商品还没有管理员操作入口。
+目前管理员审核页面和农户商品状态页面尚未接入，后端审核 API 已可用。
 
 目标流程应该是：农户提交，进入待审核，管理员同意后变成 `ON_SALE`，普通用户首页才显示。
 
-原因：管理员审核列表和审核动作属于后续 P0-2；商品领域状态与 V6 基础已完成。
+原因：前端页面属于后续 P0-3；商品领域状态与管理员 API 已完成。
 
 ## P0：明天必须完成
 
@@ -31,11 +31,11 @@ P0-1 已完成：Flyway 已迁移到 V6，商品新增 `PENDING_REVIEW`、`REJEC
 
 规则基础已完成：FARMER 创建或修改商品为 `PENDING_REVIEW`；领域模型支持后续 ADMIN 审核通过为 `ON_SALE` 或拒绝并保存原因；公开商品接口只返回 `ON_SALE`。
 
-### 2. 管理员商品审核 API
+### 2. 管理员商品审核 API（已完成）
 
-新增接口：`GET /api/admin/products/review?status=PENDING_REVIEW`、`POST /api/admin/products/{id}/approve`、`POST /api/admin/products/{id}/reject`。
+已新增接口：`GET /api/admin/products/review?status=PENDING_REVIEW`、`POST /api/admin/products/{id}/approve`、`POST /api/admin/products/{id}/reject`。
 
-拒绝接口接收 `reason`。只有 ADMIN 可访问；只能审核待审核商品；记录审核人和时间；通过后用户首页可见。
+拒绝接口接收必填 `reason`。只有 ADMIN 可访问；只能审核待审核商品；记录审核人和时间；通过后用户首页可见。管理员审核 API 测试覆盖列表、通过、拒绝、非法状态和权限。
 
 ### 3. 农户商品管理页面
 
@@ -86,13 +86,12 @@ P0-1 已完成：Flyway 已迁移到 V6，商品新增 `PENDING_REVIEW`、`REJEC
 
 ## 明天推荐顺序
 
-1. 管理员审核 API 和后端权限测试
-2. 管理员审核页面
-3. 农户商品状态页面
-4. FARMER 提交、ADMIN 审核、USER 首页验证
-5. 商品详情收藏按钮
-6. 结算页地址选择
-7. 密码、手机号、物流、评价
+1. 管理员审核页面
+2. 农户商品状态页面
+3. FARMER 提交、ADMIN 审核、USER 首页端到端验证
+4. 商品详情收藏按钮
+5. 结算页地址选择
+6. 密码、手机号、物流、评价
 
 ## 验收场景
 
@@ -104,9 +103,9 @@ P0-1 已完成：Flyway 已迁移到 V6，商品新增 `PENDING_REVIEW`、`REJEC
 
 ## 验证命令
 
-后端：进入 `backend` 执行 `mvn test`；2026-08-19 已通过 68 项，0 failures、0 errors。
+后端：进入 `backend` 执行 `mvn test`；2026-08-19 已通过 73 项，0 failures、0 errors。
 
-前端：进入 `frontend` 执行 `npm run test -- --run` 和 `npm run build`。
+前端：进入 `frontend` 执行 `npm run test -- --run` 和 `npm run build`；2026-08-19 已通过 15 项，构建成功。
 
 代码检查：在项目根目录执行 `git diff --check` 和 `git status --short`，确认没有提交 `.vscode/`。
 
