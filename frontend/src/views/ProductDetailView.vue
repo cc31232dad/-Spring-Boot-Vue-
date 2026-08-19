@@ -4,16 +4,20 @@ import { useRoute, useRouter } from 'vue-router'
 import { getProduct, type ProductDetail } from '../api/products'
 import { useAuthStore } from '../stores/auth'
 import { useCartStore } from '../stores/cart'
+import { useUserCenterStore } from '../stores/userCenter'
 
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 const cartStore = useCartStore()
+const userStore = useUserCenterStore()
 const product = ref<ProductDetail | null>(null)
 const loadError = ref('')
 const quantity = ref(1)
 const addError = ref('')
 const isAdding = ref(false)
+const isFavoriteBusy = ref(false)
+const isFavorite = ref(false)
 
 function normalizedQuantity() {
   if (!product.value) return null
@@ -37,10 +41,25 @@ function normalizedQuantity() {
 onMounted(async () => {
   try {
     product.value = await getProduct(Number(route.params.id))
+    if (auth.isLoggedIn) {
+      await userStore.loadFavorites()
+      isFavorite.value = userStore.favorites.some((item) => item.productId === product.value?.id)
+    }
   } catch {
     loadError.value = '商品暂时无法加载，请稍后返回目录重试。'
   }
 })
+
+async function toggleFavorite() {
+  if (!product.value) return
+  if (!auth.isLoggedIn) { await router.push({ name: 'login', query: { redirect: route.fullPath } }); return }
+  isFavoriteBusy.value = true
+  try {
+    if (isFavorite.value) await userStore.removeFavorite(product.value.id)
+    else await userStore.addFavorite(product.value.id)
+    isFavorite.value = !isFavorite.value
+  } finally { isFavoriteBusy.value = false }
+}
 
 async function addToCart() {
   if (!product.value) return
@@ -87,7 +106,7 @@ async function addToCart() {
           <span>商品说明</span>
           <p>{{ product.description }}</p>
         </div>
-        <div class="add-to-cart">
+        <button class="favorite-button" type="button" :disabled="isFavoriteBusy" @click="toggleFavorite">{{ isFavorite ? '已收藏' : '收藏商品' }}</button>`r`n        <div class="add-to-cart">
           <label class="quantity-control">
             <span>购买数量</span>
             <input v-model.number="quantity" type="number" min="1" :max="product.stock" :disabled="product.stock < 1" />

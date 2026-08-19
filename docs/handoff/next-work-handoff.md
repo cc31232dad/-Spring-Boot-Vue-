@@ -7,7 +7,7 @@
 
 项目已经具备真实后端，不是只有前端页面。已完成注册登录、JWT、USER/FARMER/ADMIN 权限、商品目录、农户商品创建/修改/上下架、商品审核状态基础、首页展示、购物车、普通订单、Redis Lua 秒杀、用户中心、收货地址、收藏列表和用户资料接口。
 
-P0-1 已完成：Flyway 已迁移到 V6，商品新增 `PENDING_REVIEW`、`REJECTED` 状态及审核字段；农户创建、修改和重新上架都会进入待审核，公开接口仍只返回 `ON_SALE`。P0-2 后端审核 API 已完成。P0-3/P0-4 前端农户商品状态页和管理员审核页也已接入，并新增农户本人商品列表接口。完整后端 `mvn test` 通过 75 项，前端通过 19 项测试及生产构建。
+P0-1 已完成：Flyway 已迁移到 V6，商品新增 `PENDING_REVIEW`、`REJECTED` 状态及审核字段；农户创建、修改和重新上架都会进入待审核，公开接口仍只返回 `ON_SALE`。P0-2 后端审核 API 已完成。P0-3/P0-4 前端农户商品状态页和管理员审核页也已接入，并新增农户本人商品列表接口。完整后端 `mvn test` 通过 75 项，前端通过 20 项测试及生产构建。
 
 `.vscode/` 已由 `.gitignore` 忽略，后续不得提交。
 
@@ -57,11 +57,11 @@ P0-1 已完成：Flyway 已迁移到 V6，商品新增 `PENDING_REVIEW`、`REJEC
 
 ## P1：交易和用户体验
 
-### 1. 商品详情收藏
+### 1. 商品详情收藏（已完成）
 
 收藏后端已经存在：`GET /api/favorites`、`POST /api/favorites/{productId}`、`DELETE /api/favorites/{productId}`。
 
-但 `ProductDetailView.vue` 尚未完整接入收藏按钮。需要实现登录跳转、后端初始化、收藏/取消收藏状态和 Store 测试。
+`ProductDetailView.vue` 已接入收藏按钮、登录回跳、后端状态初始化、收藏/取消收藏及用户中心 Store 同步，并补充 API 测试。
 
 ### 2. 账户安全
 
@@ -103,7 +103,7 @@ P0-1 已完成：Flyway 已迁移到 V6，商品新增 `PENDING_REVIEW`、`REJEC
 
 后端：进入 `backend` 执行 `mvn test`；2026-08-19 已通过 75 项，0 failures、0 errors。
 
-前端：进入 `frontend` 执行 `npm run test -- --run` 和 `npm run build`；2026-08-19 已通过 19 项，构建成功。
+前端：进入 `frontend` 执行 `npm run test -- --run` 和 `npm run build`；2026-08-19 已通过 20 项，构建成功。
 
 代码检查：在项目根目录执行 `git diff --check` 和 `git status --short`，确认没有提交 `.vscode/`。
 

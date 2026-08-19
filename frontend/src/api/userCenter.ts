@@ -11,6 +11,7 @@ export const listAddresses = async () => (await http.get('/address')).data.data 
 export const saveAddress = async (payload: Omit<Address, 'id' | 'isDefault'>, id?: number) => (await (id ? http.put(`/address/${id}`, payload) : http.post('/address', payload))).data.data as Address
 export const deleteAddress = async (id: number) => { await http.delete(`/address/${id}`) }
 export const setDefaultAddress = async (id: number) => (await http.put(`/address/${id}/default`)).data.data as Address
+export const addFavorite = async (productId: number) => (await http.post('/favorites/' + productId)).data.data as Favorite
 export const listFavorites = async () => (await http.get('/favorites')).data.data as Favorite[]
 export const removeFavorite = async (productId: number) => { await http.delete(`/favorites/${productId}`) }
 export const getProfile = async () => (await http.get('/user/profile')).data.data as Profile
