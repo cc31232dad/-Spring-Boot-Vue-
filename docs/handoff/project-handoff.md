@@ -53,7 +53,7 @@ Administrator review API completed on 2026-08-19: `GET /api/admin/products/revie
 
 ## Phase 9: Separate role workspaces
 
-Completed on 2026-08-20: the single Vue application now presents three role-specific surfaces. Buyers remain in the public mall at `/`; approved farmers land on `/farmer` with their own navigation for products and orders; administrators land on `/admin` with separate review and order navigation. Farmer and administrator dashboards compose existing APIs with partial-failure handling, and route contracts plus dashboard behavior are covered by frontend tests. `@lucide/vue` supplies the workspace navigation icons. No new backend API, table, operator role, customer-service role, super-administrator role, or administrator-creation flow was added.
+Completed on 2026-08-20: the single Vue application now presents three role-specific surfaces. Buyers remain in the public mall at `/`; approved farmers land on `/farmer` with their own navigation for products and orders; administrators land on `/admin` with separate review and order navigation. Farmer and administrator dashboards compose existing APIs with partial-failure handling, and route contracts plus dashboard behavior are covered by frontend tests. `@lucide/vue` supplies the workspace navigation icons. Browser acceptance also verified desktop `1440x900` and mobile `390x844` layouts; dashboard metric cards, task strips, recent-order panels, warnings, and responsive grids are now styled. No new backend API, table, operator role, customer-service role, super-administrator role, or administrator-creation flow was added.
 
 ## Recommended next phases
 
