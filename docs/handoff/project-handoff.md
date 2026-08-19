@@ -59,4 +59,8 @@ Administrator review API completed on 2026-08-19: `GET /api/admin/products/revie
 
 Account security frontend completed on 2026-08-19: profile, phone, and password forms have independent validation and feedback; password changes clear the current client session and require login with the new password. Wrong current passwords use business code 1024/HTTP 400 so they do not trigger JWT-expiry logout, and phone validation requires a `1[3-9]` prefix. Frontend verification: 25 tests passed and production build succeeded. Backend verification: 77 tests passed. Stateless JWTs are not revoked server-side after password changes; add token-version or revocation support before production.
 
-Order detail frontend completed on 2026-08-19: order detail route/page, logistics placeholder, and repurchase-to-cart flow. Frontend verification: 25 tests passed and production build succeeded.
+Order detail frontend completed on 2026-08-19: order detail route/page, logistics placeholder, and repurchase-to-cart flow.
+
+Payment and review boundaries completed on 2026-08-19: `PENDING_PAYMENT` orders expose a payment entry and `COMPLETED` orders expose a review entry from both order lists and the detail page. Both entries validate the loaded order status and display explicit unavailable notices; they do not call an API, charge funds, update order status, or persist reviews. Real payment records, sandbox integration, signed callbacks, idempotency, timeout closure, and the review backend remain deferred.
+
+Latest verification on 2026-08-19: backend `mvn test` passed 77 tests with 0 failures and 0 errors; frontend passed 33 tests and the production build succeeded.

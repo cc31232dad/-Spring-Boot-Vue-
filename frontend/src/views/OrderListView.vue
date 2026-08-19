@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue'
 import type { OrderStatus } from '../api/orders'
 import { useOrderStore } from '../stores/orders'
+import { getOrderExperience } from './orderExperience'
 
 const orderStore = useOrderStore()
 const isLoading = ref(true)
@@ -94,6 +95,8 @@ async function updateOrder(id: number, action: 'cancel' | 'complete') {
           <p v-if="actionError && actionErrorOrderId === order.id" class="form-error" role="alert">{{ actionError }}</p>
           <button v-if="order.status === 'PENDING_SHIPMENT'" class="secondary-button" type="button" :disabled="changingOrderIds.has(order.id)" @click="updateOrder(order.id, 'cancel')">{{ changingOrderIds.has(order.id) ? 'Cancelling...' : 'Cancel order' }}</button>
           <button v-else-if="order.status === 'SHIPPED'" type="button" :disabled="changingOrderIds.has(order.id)" @click="updateOrder(order.id, 'complete')">{{ changingOrderIds.has(order.id) ? 'Confirming...' : 'Confirm delivery' }}</button>
+          <RouterLink v-if="getOrderExperience(order.status).payment" class="primary-action order-action-link" :to="{ name: 'order-detail', params: { id: order.id }, query: { action: 'payment' } }">去支付</RouterLink>
+          <RouterLink v-if="getOrderExperience(order.status).review" class="primary-action order-action-link" :to="{ name: 'order-detail', params: { id: order.id }, query: { action: 'review' } }">评价商品</RouterLink>
         </footer>
       </article>
     </section>
