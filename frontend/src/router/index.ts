@@ -12,7 +12,11 @@ import FarmerOrdersView from '../views/farmer/FarmerOrdersView.vue'
 import AdminOrdersView from '../views/admin/AdminOrdersView.vue'
 import AdminProductsView from '../views/admin/AdminProductsView.vue'
 import AdminFarmersView from '../views/admin/AdminFarmersView.vue'
+import AdminLayout from '../views/admin/AdminLayout.vue'
+import AdminDashboardView from '../views/admin/AdminDashboardView.vue'
 import FarmerProductsView from '../views/farmer/FarmerProductsView.vue'
+import FarmerLayout from '../views/farmer/FarmerLayout.vue'
+import FarmerDashboardView from '../views/farmer/FarmerDashboardView.vue'
 import SeckillView from '../views/SeckillView.vue'
 import UserLayout from '../views/user/UserLayout.vue'
 import UserOverviewView from '../views/user/UserOverviewView.vue'
@@ -37,17 +41,22 @@ const router = createRouter({
       { path: 'favorites', name: 'user-favorites', component: UserFavoritesView },
       { path: 'settings', name: 'user-settings', component: UserSettingsView }
     ] },
-    { path: '/farmer/orders', name: 'farmer-orders', component: FarmerOrdersView, meta: { requiresAuth: true } },
-    { path: '/admin/orders', name: 'admin-orders', component: AdminOrdersView, meta: { requiresAuth: true } },
-    { path: '/admin/products', name: 'admin-products', component: AdminProductsView, meta: { requiresAuth: true, requiredRole: 'ADMIN' } },
-    { path: '/admin/farmers', name: 'admin-farmers', component: AdminFarmersView, meta: { requiresAuth: true, requiredRole: 'ADMIN' } },
-    { path: '/farmer/products', name: 'farmer-products', component: FarmerProductsView, meta: { requiresAuth: true, requiredRole: 'FARMER' } },
-    { path: '/farmer/products/:id/edit', name: 'farmer-product-edit', component: ProductFormView, meta: { requiresAuth: true, requiredRole: 'FARMER' } },
     {
-      path: '/farmer/products/new',
-      name: 'farmer-product-new',
-      component: ProductFormView,
-      meta: { requiresAuth: true }
+      path: '/farmer', component: FarmerLayout, meta: { requiresAuth: true, requiredRole: 'FARMER' }, children: [
+        { path: '', name: 'farmer-dashboard', component: FarmerDashboardView },
+        { path: 'products', name: 'farmer-products', component: FarmerProductsView },
+        { path: 'products/new', name: 'farmer-product-new', component: ProductFormView },
+        { path: 'products/:id/edit', name: 'farmer-product-edit', component: ProductFormView },
+        { path: 'orders', name: 'farmer-orders', component: FarmerOrdersView }
+      ]
+    },
+    {
+      path: '/admin', component: AdminLayout, meta: { requiresAuth: true, requiredRole: 'ADMIN' }, children: [
+        { path: '', name: 'admin-dashboard', component: AdminDashboardView },
+        { path: 'products', name: 'admin-products', component: AdminProductsView },
+        { path: 'farmers', name: 'admin-farmers', component: AdminFarmersView },
+        { path: 'orders', name: 'admin-orders', component: AdminOrdersView }
+      ]
     },
     { path: '/login', name: 'login', component: LoginView },
     { path: '/register', name: 'register', component: RegisterView }
