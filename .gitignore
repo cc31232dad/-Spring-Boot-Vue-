@@ -1,5 +1,6 @@
 .worktrees/
 .superpowers/
+.vscode/
 
 # Local secrets and runtime data
 .env
