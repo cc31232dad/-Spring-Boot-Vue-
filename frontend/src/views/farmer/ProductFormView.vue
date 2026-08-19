@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { createProduct, listCategories, type Category, type ProductPayload } from '../../api/products'
+import { useRoute, useRouter } from 'vue-router'
+import { createProduct, listCategories, listFarmerProducts, updateProduct, type Category, type ProductPayload } from '../../api/products'
 
 const router = useRouter()
+const route = useRoute()
+const editId = Number(route.params.id) || 0
 const categories = ref<Category[]>([])
 const isSubmitting = ref(false)
 const formError = ref('')
@@ -20,6 +22,11 @@ const form = reactive<ProductPayload>({
 onMounted(async () => {
   try {
     categories.value = await listCategories()
+    if (editId) {
+      const product = (await listFarmerProducts()).find((item) => item.id === editId)
+      if (!product) throw new Error('商品不存在')
+      Object.assign(form, product)
+    }
   } catch {
     formError.value = '商品分类暂时无法加载，请稍后刷新页面。'
   }
@@ -30,10 +37,11 @@ async function submitProduct() {
   isSubmitting.value = true
 
   try {
-    await createProduct(form)
-    await router.push({ name: 'home' })
+    if (editId) await updateProduct(editId, form)
+    else await createProduct(form)
+    await router.push({ name: 'farmer-products' })
   } catch {
-    formError.value = '商品上架失败，请检查填写内容后重试。'
+    formError.value = '商品保存失败，请检查填写内容后重试。'
   } finally {
     isSubmitting.value = false
   }
@@ -45,8 +53,8 @@ async function submitProduct() {
     <RouterLink class="back-link" :to="{ name: 'home' }">← 返回商品目录</RouterLink>
     <section class="form-shell" aria-labelledby="product-form-title">
       <div class="form-intro">
-        <p class="eyebrow">FARMER MARKET · 新鲜上架</p>
-        <h1 id="product-form-title">上架产地好物</h1>
+        <p class="eyebrow">FARMER MARKET · 商品管理</p>
+        <h1 id="product-form-title">{{ editId ? '修改商品' : '上架产地好物' }}</h1>
         <p>把田间的风味和来处写清楚，让每一位顾客安心认识你的收成。</p>
       </div>
 
@@ -85,7 +93,7 @@ async function submitProduct() {
           商品图片地址
           <input v-model.trim="form.imageUrl" required type="url" placeholder="https://example.com/product.jpg" />
         </label>
-        <button type="submit" :disabled="isSubmitting || !categories.length">{{ isSubmitting ? '正在上架…' : '确认上架商品' }}</button>
+        <button type="submit" :disabled="isSubmitting || !categories.length">{{ isSubmitting ? '正在保存…' : (editId ? '保存并重新提交审核' : '确认提交审核') }}</button>
       </form>
     </section>
   </main>

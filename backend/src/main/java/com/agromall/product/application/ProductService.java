@@ -79,6 +79,13 @@ public class ProductService {
         return toDetailView(product);
     }
 
+    public List<ProductReviewView> listFarmerProducts(Long farmerId) {
+        return productMapper.selectList(new LambdaQueryWrapper<Product>()
+                        .eq(Product::getFarmerId, farmerId)
+                        .orderByDesc(Product::getCreatedAt))
+                .stream().map(this::toReviewView).toList();
+    }
+
     public ProductDetailView updateProduct(Long actorId, boolean admin, Long productId, ProductUpdateRequest request) {
         Product product = getProduct(productId);
         assertCanManage(actorId, admin, product);
@@ -92,6 +99,9 @@ public class ProductService {
     public ProductDetailView changeStatus(Long actorId, boolean admin, Long productId, ProductStatus status) {
         Product product = getProduct(productId);
         assertCanManage(actorId, admin, product);
+        if (!admin && !isAllowedFarmerTransition(product, status)) {
+            throw new BusinessException(ErrorCode.PRODUCT_REVIEW_INVALID);
+        }
         switch (status) {
             case PENDING_REVIEW -> product.submitForReview();
             case OFF_SALE -> product.offSale();
@@ -99,6 +109,13 @@ public class ProductService {
         }
         productMapper.updateById(product);
         return toDetailView(product);
+    }
+
+    private boolean isAllowedFarmerTransition(Product product, ProductStatus target) {
+        ProductStatus current = ProductStatus.valueOf(product.getStatus());
+        return (target == ProductStatus.OFF_SALE && current == ProductStatus.ON_SALE)
+                || (target == ProductStatus.PENDING_REVIEW
+                    && (current == ProductStatus.OFF_SALE || current == ProductStatus.REJECTED));
     }
 
     public List<ProductReviewView> listReviewProducts(ProductStatus status) {

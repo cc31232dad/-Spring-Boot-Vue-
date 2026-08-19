@@ -23,6 +23,7 @@ function removeToken() {
 export const useAuthStore = defineStore('auth', () => {
   const accessToken = ref(readToken())
   const username = ref('')
+  const roles = ref<string[]>([])
   const isLoggedIn = computed(() => Boolean(accessToken.value))
 
   async function login(credentials: authApi.LoginPayload) {
@@ -34,14 +35,16 @@ export const useAuthStore = defineStore('auth', () => {
   async function loadCurrentUser() {
     const user = await authApi.me()
     username.value = user.username
+    roles.value = user.roles
     return user
   }
 
   function clearSession() {
     accessToken.value = ''
     username.value = ''
+    roles.value = []
     removeToken()
   }
 
-  return { accessToken, username, isLoggedIn, login, loadCurrentUser, clearSession }
+  return { accessToken, username, roles, isLoggedIn, login, loadCurrentUser, clearSession }
 })

@@ -9,6 +9,8 @@ import CartView from '../views/CartView.vue'
 import OrderListView from '../views/OrderListView.vue'
 import FarmerOrdersView from '../views/farmer/FarmerOrdersView.vue'
 import AdminOrdersView from '../views/admin/AdminOrdersView.vue'
+import AdminProductsView from '../views/admin/AdminProductsView.vue'
+import FarmerProductsView from '../views/farmer/FarmerProductsView.vue'
 import SeckillView from '../views/SeckillView.vue'
 import UserLayout from '../views/user/UserLayout.vue'
 import UserOverviewView from '../views/user/UserOverviewView.vue'
@@ -34,6 +36,9 @@ const router = createRouter({
     ] },
     { path: '/farmer/orders', name: 'farmer-orders', component: FarmerOrdersView, meta: { requiresAuth: true } },
     { path: '/admin/orders', name: 'admin-orders', component: AdminOrdersView, meta: { requiresAuth: true } },
+    { path: '/admin/products', name: 'admin-products', component: AdminProductsView, meta: { requiresAuth: true, requiredRole: 'ADMIN' } },
+    { path: '/farmer/products', name: 'farmer-products', component: FarmerProductsView, meta: { requiresAuth: true, requiredRole: 'FARMER' } },
+    { path: '/farmer/products/:id/edit', name: 'farmer-product-edit', component: ProductFormView, meta: { requiresAuth: true, requiredRole: 'FARMER' } },
     {
       path: '/farmer/products/new',
       name: 'farmer-product-new',
@@ -45,9 +50,18 @@ const router = createRouter({
   ]
 })
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   if (to.meta.requiresAuth && !useAuthStore().isLoggedIn) {
     return { name: 'login', query: { redirect: to.fullPath } }
+  }
+
+  const requiredRole = to.meta.requiredRole as string | undefined
+  if (requiredRole) {
+    const auth = useAuthStore()
+    if (!auth.roles.length) {
+      try { await auth.loadCurrentUser() } catch { return { name: 'login', query: { redirect: to.fullPath } } }
+    }
+    if (!auth.roles.includes(requiredRole)) return { name: 'home' }
   }
 
   if ((to.name === 'login' || to.name === 'register') && useAuthStore().isLoggedIn) {

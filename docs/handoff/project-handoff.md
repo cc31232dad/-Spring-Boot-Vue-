@@ -46,13 +46,13 @@ Verification: see `docs/testing/phase-4-seckill.md`.
 
 ## Phase 7: Product review foundation
 
-Implemented: Flyway V6 product review audit columns, `PENDING_REVIEW` and `REJECTED` domain states, farmer create/edit/resubmit transitions, review audit persistence, and public visibility protection. Existing sale-dependent tests now explicitly approve their fixtures. Full backend verification on 2026-08-19: 68 tests passed.
-Deferred: administrator review pages, farmer product status page, and end-to-end FARMER -> ADMIN -> USER acceptance flow.
+Implemented: Flyway V6 product review audit columns, `PENDING_REVIEW` and `REJECTED` domain states, farmer create/edit/resubmit transitions, review audit persistence, and public visibility protection. Existing sale-dependent tests now explicitly approve their fixtures. Full backend verification on 2026-08-19: 75 tests passed.
+Completed: administrator review page, farmer-owned product list API, and farmer product status page. Deferred: browser-based FARMER -> ADMIN -> USER acceptance flow.
 
 Administrator review API completed on 2026-08-19: `GET /api/admin/products/review`, `POST /api/admin/products/{id}/approve`, and `POST /api/admin/products/{id}/reject`. ADMIN-only access, pending-state guard, reviewer audit fields, reject reason validation, and public visibility are covered by integration tests.
 
 ## Recommended next phases
 
 1. Phase 5: Alipay sandbox payment.
-2. Phase 6: administrator product review pages and farmer product status page.
+2. Complete browser-based product review acceptance and product favorites integration.
 3. Phase 7: logistics, reviews, admin statistics, and UI polish.
