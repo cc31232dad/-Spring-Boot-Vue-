@@ -24,6 +24,7 @@ public enum ErrorCode {
     FAVORITE_NOT_FOUND(1021, "Favorite not found"),
     USER_NOT_FOUND(1022, "User not found"),
     PRODUCT_REVIEW_INVALID(1023, "Product review state is invalid"),
+    CURRENT_PASSWORD_INVALID(1024, "Current password is incorrect"),
     INTERNAL_ERROR(9999, "Internal server error");
 
     private final int code;

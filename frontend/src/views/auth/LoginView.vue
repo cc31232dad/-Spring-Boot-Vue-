@@ -33,6 +33,8 @@ async function submit() {
       <h1 id="login-title">回到助农商城</h1>
       <p class="intro">登录后，继续发现来自田野的新鲜心意。</p>
 
+      <p v-if="route.query.passwordChanged === '1'" class="form-success" role="status">密码已修改，请使用新密码重新登录。</p>
+
       <form class="auth-form" @submit.prevent="submit">
         <label>
           用户名
@@ -50,3 +52,7 @@ async function submit() {
     </section>
   </main>
 </template>
+
+<style scoped>
+.form-success { margin: 18px 0 0; color: var(--leaf-green-deep); font-weight: 700; }
+</style>

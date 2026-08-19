@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -71,6 +72,26 @@ class UserCenterApiTest {
                 .andExpect(jsonPath("$.data.length()").value(1)).andExpect(jsonPath("$.data[0].productId").value(product.getId()));
     }
 
+    @Test
+    void securityUpdatesRejectWrongPasswordWithoutUnauthorizedStatus() throws Exception {
+        User user = user("ucsecurity" + System.nanoTime(), "139" + digits());
+        String token = login(user.getUsername(), user.getPhone());
+        mvc.perform(put("/api/user/password").header("Authorization", bearer(token)).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"currentPassword\":\"WrongPass1\",\"newPassword\":\"Newpass1\"}"))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value(1024));
+        mvc.perform(put("/api/user/phone").header("Authorization", bearer(token)).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"currentPassword\":\"WrongPass1\",\"phone\":\"13900000000\"}"))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value(1024));
+    }
+
+    @Test
+    void phoneUpdateRejectsInvalidMainlandMobilePrefix() throws Exception {
+        User user = user("ucphone" + System.nanoTime(), "138" + digits());
+        String token = login(user.getUsername(), user.getPhone());
+        mvc.perform(put("/api/user/phone").header("Authorization", bearer(token)).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"currentPassword\":\"Passw0rd!\",\"phone\":\"10000000000\"}"))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value(1005));
+    }
     @Test
     void myOrdersCanFilterAndPageByStatus() throws Exception {
         User user = user("ucorder" + System.nanoTime(), "136" + digits());

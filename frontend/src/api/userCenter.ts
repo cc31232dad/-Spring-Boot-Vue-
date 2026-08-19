@@ -6,6 +6,8 @@ export type Favorite = { id: number; productId: number; name: string; price: num
 export type Profile = { id: number; username: string; nickname: string | null; realName: string | null; phone: string; email: string | null; avatarUrl: string | null }
 export const selectCheckoutAddress = (addresses: Address[]) => addresses.find((item) => item.isDefault) ?? addresses[0]
 export const formatAddress = (address: Address) => [address.province, address.city, address.district, address.detail].join('')
+export const updatePassword = async (payload: { currentPassword: string; newPassword: string }) => { await http.put('/user/password', payload) }
+export const updatePhone = async (payload: { currentPassword: string; phone: string }) => (await http.put('/user/phone', payload)).data.data as Profile
 export const listOrders = async (status?: string) => (await http.get('/orders/my', { params: status ? { status } : {} })).data.data as Order[]
 export const cancelOrder = async (id: number) => (await http.post(`/orders/${id}/cancel`)).data.data as Order
 export const confirmOrder = async (id: number) => (await http.post(`/orders/${id}/confirm`)).data.data as Order

@@ -7,7 +7,7 @@
 
 项目已经具备真实后端，不是只有前端页面。已完成注册登录、JWT、USER/FARMER/ADMIN 权限、商品目录、农户商品创建/修改/上下架、商品审核状态基础、首页展示、购物车、普通订单、Redis Lua 秒杀、用户中心、收货地址、收藏列表和用户资料接口。
 
-P0-1 已完成：Flyway 已迁移到 V6，商品新增 `PENDING_REVIEW`、`REJECTED` 状态及审核字段；农户创建、修改和重新上架都会进入待审核，公开接口仍只返回 `ON_SALE`。P0-2 后端审核 API 已完成。P0-3/P0-4 前端农户商品状态页和管理员审核页也已接入，并新增农户本人商品列表接口。完整后端 `mvn test` 通过 75 项，前端通过 21 项测试及生产构建。
+P0-1 已完成：Flyway 已迁移到 V6，商品新增 `PENDING_REVIEW`、`REJECTED` 状态及审核字段；农户创建、修改和重新上架都会进入待审核，公开接口仍只返回 `ON_SALE`。P0-2 后端审核 API 已完成。P0-3/P0-4 前端农户商品状态页和管理员审核页也已接入，并新增农户本人商品列表接口。完整后端 `mvn test` 通过 77 项，前端通过 24 项测试及生产构建。
 
 `.vscode/` 已由 `.gitignore` 忽略，后续不得提交。
 
@@ -63,9 +63,11 @@ P0-1 已完成：Flyway 已迁移到 V6，商品新增 `PENDING_REVIEW`、`REJEC
 
 `ProductDetailView.vue` 已接入收藏按钮、登录回跳、后端状态初始化、收藏/取消收藏及用户中心 Store 同步，并补充 API 测试。
 
-### 2. 账户安全
+### 2. 账户安全（已完成）
 
-后端已有 `PUT /api/user/password` 和 `PUT /api/user/phone`。账户设置页需要增加旧密码、新密码、确认密码、手机号校验、加载状态和成功失败提示。修改密码成功后建议重新登录。
+账户设置页已接入 `PUT /api/user/password` 和 `PUT /api/user/phone`，包含当前密码、新密码、确认密码、手机号校验、独立加载状态及成功失败提示。密码修改成功后清除前端会话并跳转登录页，提示使用新密码重新登录。
+
+当前 JWT 为无状态令牌，修改密码尚不能服务端撤销其他设备或已复制令牌；令牌最多继续有效到 30 分钟过期。生产化前需增加 token version 或服务端撤销列表。
 
 ### 3. 结算页地址（已完成）
 
@@ -87,9 +89,8 @@ P0-1 已完成：Flyway 已迁移到 V6，商品新增 `PENDING_REVIEW`、`REJEC
 ## 后续推荐顺序
 
 1. FARMER 提交、ADMIN 审核、USER 首页端到端验证
-2. 商品详情收藏按钮
-3. 结算页地址选择
-4. 密码、手机号、物流、评价
+2. 订单详情、物流占位与再次购买
+3. 评价入口和支付边界
 
 ## 验收场景
 
@@ -101,9 +102,9 @@ P0-1 已完成：Flyway 已迁移到 V6，商品新增 `PENDING_REVIEW`、`REJEC
 
 ## 验证命令
 
-后端：进入 `backend` 执行 `mvn test`；2026-08-19 已通过 75 项，0 failures、0 errors。
+后端：进入 `backend` 执行 `mvn test`；2026-08-19 已通过 77 项，0 failures、0 errors。
 
-前端：进入 `frontend` 执行 `npm run test -- --run` 和 `npm run build`；2026-08-19 已通过 21 项，构建成功。
+前端：进入 `frontend` 执行 `npm run test -- --run` 和 `npm run build`；2026-08-19 已通过 24 项，构建成功。
 
 代码检查：在项目根目录执行 `git diff --check` 和 `git status --short`，确认没有提交 `.vscode/`。
 

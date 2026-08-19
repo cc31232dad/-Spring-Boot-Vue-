@@ -129,7 +129,7 @@ public class UserCenterService {
     @Transactional
     public void updatePassword(Long userId, PasswordUpdateRequest request) {
         User user = user(userId);
-        if (!passwordEncoder.matches(request.currentPassword(), user.getPasswordHash())) throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
+        if (!passwordEncoder.matches(request.currentPassword(), user.getPasswordHash())) throw new BusinessException(ErrorCode.CURRENT_PASSWORD_INVALID);
         user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
         userMapper.updateById(user);
     }
@@ -137,7 +137,7 @@ public class UserCenterService {
     @Transactional
     public ProfileView updatePhone(Long userId, PhoneUpdateRequest request) {
         User user = user(userId);
-        if (!passwordEncoder.matches(request.currentPassword(), user.getPasswordHash())) throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
+        if (!passwordEncoder.matches(request.currentPassword(), user.getPasswordHash())) throw new BusinessException(ErrorCode.CURRENT_PASSWORD_INVALID);
         User existing = userMapper.selectOne(Wrappers.<User>lambdaQuery().eq(User::getPhone, request.phone()).ne(User::getId, userId));
         if (existing != null) throw new BusinessException(ErrorCode.USER_ALREADY_EXISTS);
         user.setPhone(request.phone()); userMapper.updateById(user);

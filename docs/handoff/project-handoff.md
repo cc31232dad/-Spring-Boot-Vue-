@@ -46,7 +46,7 @@ Verification: see `docs/testing/phase-4-seckill.md`.
 
 ## Phase 7: Product review foundation
 
-Implemented: Flyway V6 product review audit columns, `PENDING_REVIEW` and `REJECTED` domain states, farmer create/edit/resubmit transitions, review audit persistence, and public visibility protection. Existing sale-dependent tests now explicitly approve their fixtures. Full backend verification on 2026-08-19: 75 tests passed.
+Implemented: Flyway V6 product review audit columns, `PENDING_REVIEW` and `REJECTED` domain states, farmer create/edit/resubmit transitions, review audit persistence, and public visibility protection. Existing sale-dependent tests now explicitly approve their fixtures. Full backend verification on 2026-08-19: 77 tests passed.
 Completed: administrator review page, farmer-owned product list API, and farmer product status page. Deferred: browser-based FARMER -> ADMIN -> USER acceptance flow.
 
 Administrator review API completed on 2026-08-19: `GET /api/admin/products/review`, `POST /api/admin/products/{id}/approve`, and `POST /api/admin/products/{id}/reject`. ADMIN-only access, pending-state guard, reviewer audit fields, reject reason validation, and public visibility are covered by integration tests.
@@ -54,5 +54,7 @@ Administrator review API completed on 2026-08-19: `GET /api/admin/products/revie
 ## Recommended next phases
 
 1. Phase 5: Alipay sandbox payment.
-2. Complete browser-based product review acceptance and account security integration.
+2. Complete browser-based product review acceptance, then add order details, logistics placeholders, and repurchase flows.
 3. Phase 7: logistics, reviews, admin statistics, and UI polish.
+
+Account security frontend completed on 2026-08-19: profile, phone, and password forms have independent validation and feedback; password changes clear the current client session and require login with the new password. Wrong current passwords use business code 1024/HTTP 400 so they do not trigger JWT-expiry logout, and phone validation requires a `1[3-9]` prefix. Frontend verification: 24 tests passed and production build succeeded. Backend verification: 77 tests passed. Stateless JWTs are not revoked server-side after password changes; add token-version or revocation support before production.

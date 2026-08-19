@@ -106,7 +106,8 @@ async function addToCart() {
           <span>商品说明</span>
           <p>{{ product.description }}</p>
         </div>
-        <button class="favorite-button" type="button" :disabled="isFavoriteBusy" @click="toggleFavorite">{{ isFavorite ? '已收藏' : '收藏商品' }}</button>`r`n        <div class="add-to-cart">
+        <button class="favorite-button" type="button" :disabled="isFavoriteBusy" @click="toggleFavorite">{{ isFavorite ? '已收藏' : '收藏商品' }}</button>
+        <div class="add-to-cart">
           <label class="quantity-control">
             <span>购买数量</span>
             <input v-model.number="quantity" type="number" min="1" :max="product.stock" :disabled="product.stock < 1" />

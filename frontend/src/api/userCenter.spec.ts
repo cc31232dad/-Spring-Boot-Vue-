@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import http from './http'
-import { addFavorite, formatAddress, removeFavorite, selectCheckoutAddress } from './userCenter'
-vi.mock('./http', () => ({ default: { post: vi.fn(), delete: vi.fn() } }))
+import { addFavorite, formatAddress, removeFavorite, selectCheckoutAddress, updatePassword, updatePhone } from './userCenter'
+vi.mock('./http', () => ({ default: { post: vi.fn(), delete: vi.fn(), put: vi.fn() } }))
 describe('favorite api', () => {
   beforeEach(() => vi.clearAllMocks())
   it('adds a favorite and removes it by product id', async () => {
@@ -10,6 +10,13 @@ describe('favorite api', () => {
     await removeFavorite(7)
     expect(http.post).toHaveBeenCalledWith('/favorites/7')
     expect(http.delete).toHaveBeenCalledWith('/favorites/7')
+  })
+  it('updates password and phone through the security endpoints', async () => {
+    vi.mocked(http.put).mockResolvedValue({ data: { data: { phone: '13900000000' } } })
+    await updatePassword({ currentPassword: 'Oldpass1', newPassword: 'Newpass1' })
+    await updatePhone({ currentPassword: 'Newpass1', phone: '13900000000' })
+    expect(http.put).toHaveBeenNthCalledWith(1, '/user/password', { currentPassword: 'Oldpass1', newPassword: 'Newpass1' })
+    expect(http.put).toHaveBeenNthCalledWith(2, '/user/phone', { currentPassword: 'Newpass1', phone: '13900000000' })
   })
   it('selects the default checkout address and formats all regions', () => {
     const addresses = [

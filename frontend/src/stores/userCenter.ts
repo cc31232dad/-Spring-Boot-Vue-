@@ -15,6 +15,7 @@ export const useUserCenterStore = defineStore('user-center', () => {
   async function loadFavorites() { favorites.value = await api.listFavorites() }
   async function removeFavorite(productId: number) { await api.removeFavorite(productId); favorites.value = favorites.value.filter((item) => item.productId !== productId) }
   async function loadProfile() { profile.value = await api.getProfile() }
+  function setProfile(value: api.Profile) { profile.value = value }
   async function saveProfile(payload: Partial<api.Profile>) { profile.value = await api.updateProfile(payload) }
-  return { addresses, favorites, profile, loading, loadAddresses, saveAddress, removeAddress, makeDefault, addFavorite, loadFavorites, removeFavorite, loadProfile, saveProfile }
+  return { addresses, favorites, profile, loading, loadAddresses, saveAddress, removeAddress, makeDefault, addFavorite, loadFavorites, removeFavorite, loadProfile, setProfile, saveProfile }
 })
