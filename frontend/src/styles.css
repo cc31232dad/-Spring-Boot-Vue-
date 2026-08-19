@@ -235,3 +235,6 @@ a { color: var(--leaf-green); font-weight: 700; }
 .checkout-address span { display: grid; gap: 4px; }
 .checkout-address small { color: var(--muted-ink); line-height: 1.4; }
 .checkout-address em { color: var(--leaf-green); font-size: .75rem; font-style: normal; }
+.logistics-placeholder { margin: 18px 0; padding: 18px; border: 1px dashed var(--input-border); background: var(--field-mist); }
+.logistics-placeholder h2, .logistics-placeholder p { margin: 5px 0 0; }
+.logistics-placeholder p:last-child { color: var(--muted-ink); line-height: 1.5; }

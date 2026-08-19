@@ -71,7 +71,7 @@ async function updateOrder(id: number, action: 'cancel' | 'complete') {
         <div class="order-card-topline">
           <div>
             <p class="eyebrow">Order {{ order.orderNo }}</p>
-            <p class="order-role">Farm partner #{{ order.farmerId }}</p>
+            <p class="order-role">Farm partner #{{ order.farmerId }}</p><RouterLink class="order-detail-link" :to="{ name: 'order-detail', params: { id: order.id } }">查看详情</RouterLink>
           </div>
           <span class="order-status" :class="`status-${order.status.toLowerCase()}`">{{ statusLabels[order.status] }}</span>
         </div>

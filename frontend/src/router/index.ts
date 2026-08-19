@@ -7,6 +7,7 @@ import RegisterView from '../views/auth/RegisterView.vue'
 import ProductFormView from '../views/farmer/ProductFormView.vue'
 import CartView from '../views/CartView.vue'
 import OrderListView from '../views/OrderListView.vue'
+import OrderDetailView from '../views/OrderDetailView.vue'
 import FarmerOrdersView from '../views/farmer/FarmerOrdersView.vue'
 import AdminOrdersView from '../views/admin/AdminOrdersView.vue'
 import AdminProductsView from '../views/admin/AdminProductsView.vue'
@@ -26,6 +27,7 @@ const router = createRouter({
     { path: '/products/:id', name: 'product-detail', component: ProductDetailView },
     { path: '/cart', name: 'cart', component: CartView, meta: { requiresAuth: true } },
     { path: '/orders', name: 'orders', component: OrderListView, meta: { requiresAuth: true } },
+    { path: '/orders/:id', name: 'order-detail', component: OrderDetailView, meta: { requiresAuth: true } },
     { path: '/seckill', name: 'seckill', component: SeckillView },
     { path: '/user', component: UserLayout, meta: { requiresAuth: true }, children: [
       { path: '', name: 'user', component: UserOverviewView },
