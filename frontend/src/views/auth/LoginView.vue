@@ -3,56 +3,9 @@ import { reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { errorMessage } from '../../api/auth'
 import { useAuthStore } from '../../stores/auth'
-
-const router = useRouter()
-const route = useRoute()
-const auth = useAuthStore()
-const form = reactive({ username: '', password: '' })
-const error = ref('')
-const submitting = ref(false)
-
-async function submit() {
-  error.value = ''
-  submitting.value = true
-
-  try {
-    await auth.login(form)
-    await router.replace(typeof route.query.redirect === 'string' ? route.query.redirect : '/')
-  } catch (reason) {
-    error.value = errorMessage(reason)
-  } finally {
-    submitting.value = false
-  }
-}
+const router = useRouter(); const route = useRoute(); const auth = useAuthStore()
+const mode = ref<'buyer' | 'farmer' | 'admin'>('buyer'); const form = reactive({ username: '', password: '' }); const error = ref(''); const submitting = ref(false)
+const labels = { buyer: { placeholder: '手机号或用户名', hint: '使用手机号或用户名登录，新用户请先注册。' }, farmer: { placeholder: '注册时的手机号', hint: '农户账号需审核通过后方可登录，请使用注册时的手机号。' }, admin: { placeholder: '管理员账号', hint: '仅内部使用，请使用管理员账号登录。' } }
+async function submit() { error.value=''; submitting.value=true; try { await auth.login({ ...form, role: mode.value === 'buyer' ? 'USER' : mode.value === 'farmer' ? 'FARMER' : 'ADMIN' }); await router.replace(typeof route.query.redirect === 'string' ? route.query.redirect : '/') } catch (e) { error.value=errorMessage(e) } finally { submitting.value=false } }
 </script>
-
-<template>
-  <main class="auth-page">
-    <section class="auth-card" aria-labelledby="login-title">
-      <p class="eyebrow">田间好物 · 直连校园</p>
-      <h1 id="login-title">回到助农商城</h1>
-      <p class="intro">登录后，继续发现来自田野的新鲜心意。</p>
-
-      <p v-if="route.query.passwordChanged === '1'" class="form-success" role="status">密码已修改，请使用新密码重新登录。</p>
-
-      <form class="auth-form" @submit.prevent="submit">
-        <label>
-          用户名
-          <input v-model.trim="form.username" autocomplete="username" required />
-        </label>
-        <label>
-          密码
-          <input v-model="form.password" type="password" autocomplete="current-password" required />
-        </label>
-        <p v-if="error" class="form-error" role="alert">{{ error }}</p>
-        <button type="submit" :disabled="submitting">{{ submitting ? '正在登录…' : '登录商城' }}</button>
-      </form>
-
-      <p class="auth-switch">还没有账号？<RouterLink to="/register">去注册</RouterLink></p>
-    </section>
-  </main>
-</template>
-
-<style scoped>
-.form-success { margin: 18px 0 0; color: var(--leaf-green-deep); font-weight: 700; }
-</style>
+<template><main class="auth-page"><section class="auth-card" aria-labelledby="login-title"><p class="eyebrow">田间好物 · 直连校园</p><h1 id="login-title">回到助农商城</h1><p class="intro">登录后，继续发现来自田野的新鲜心意。</p><div class="auth-tabs" role="tablist"><button type="button" :class="{active:mode==='buyer'}" @click="mode='buyer'">我是买家</button><button type="button" :class="{active:mode==='farmer'}" @click="mode='farmer'">我是农户</button></div><p class="auth-hint" :class="{farmer:mode!=='buyer'}">{{ labels[mode].hint }}</p><form class="auth-form" @submit.prevent="submit"><label>账号<input v-model.trim="form.username" :placeholder="labels[mode].placeholder" autocomplete="username" required /></label><label>密码<input v-model="form.password" type="password" autocomplete="current-password" required /></label><p v-if="error" class="form-error" role="alert">{{ error }}</p><button type="submit" :disabled="submitting">{{ submitting ? '正在登录…' : '登录商城' }}</button></form><p class="auth-options"><label><input type="checkbox" /> 记住我</label><a href="#" @click.prevent="error='密码找回功能暂未接入。'">忘记密码</a></p><p class="admin-channel"><button type="button" @click="mode = mode === 'admin' ? 'buyer' : 'admin'">{{ mode === 'admin' ? '返回买家登录' : '管理员通道' }}</button><small>仅内部使用</small></p><p class="auth-switch">还没有账号？<RouterLink to="/register">去注册</RouterLink></p></section></main></template>

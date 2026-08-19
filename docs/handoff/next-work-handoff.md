@@ -11,6 +11,8 @@ P0-1 已完成：Flyway 已迁移到 V6，商品新增 `PENDING_REVIEW`、`REJEC
 
 `.vscode/` 已由 `.gitignore` 忽略，后续不得提交。
 
+多角色认证与农户入驻第一阶段已完成：V7 新增独立 `farmer_profiles` 和 `farmer_audits`；农户可使用手机号提交入驻申请，待审核和被拒绝状态不能登录，拒绝后可复用原账号重新提交。管理员可在 `/admin/farmers` 查看待审核资料并通过或带原因拒绝。登录页已区分买家、农户和内部管理员通道，注册页已区分买家快速注册与农户资质申请。
+
 最近相关提交：`a773e1e`、`3849014`、`1a3b59b`、`d430e0a`、`eb6ec7c`。
 
 ## 最大业务缺口
@@ -87,6 +89,7 @@ P0-1 已完成：Flyway 已迁移到 V6，商品新增 `PENDING_REVIEW`、`REJEC
 - 评价：评分、文字、图片和农户回复
 - 售后：退款和售后申请
 - 管理员统计：审核数、商品数、用户数、订单数、销售金额、农户排行
+- 管理员账号管理：管理员列表、由超级管理员创建管理员、细分运营/客服权限；普通注册仍禁止创建管理员
 
 ## 后续推荐顺序
 
@@ -105,9 +108,9 @@ P0-1 已完成：Flyway 已迁移到 V6，商品新增 `PENDING_REVIEW`、`REJEC
 
 ## 验证命令
 
-后端：进入 `backend` 执行 `mvn test`；2026-08-19 已通过 77 项，0 failures、0 errors。
+后端：进入 `backend` 执行 `mvn test`；2026-08-19 已通过 80 项，0 failures、0 errors。
 
-前端：进入 `frontend` 执行 `npm run test -- --run` 和 `npm run build`；2026-08-19 已通过 33 项，构建成功。
+前端：进入 `frontend` 执行 `npm run test -- --run` 和 `npm run build`；2026-08-19 已通过 36 项，构建成功。
 
 代码检查：在项目根目录执行 `git diff --check` 和 `git status --short`，确认没有提交 `.vscode/`。
 

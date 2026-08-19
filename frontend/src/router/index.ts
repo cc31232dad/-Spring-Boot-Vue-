@@ -11,6 +11,7 @@ import OrderDetailView from '../views/OrderDetailView.vue'
 import FarmerOrdersView from '../views/farmer/FarmerOrdersView.vue'
 import AdminOrdersView from '../views/admin/AdminOrdersView.vue'
 import AdminProductsView from '../views/admin/AdminProductsView.vue'
+import AdminFarmersView from '../views/admin/AdminFarmersView.vue'
 import FarmerProductsView from '../views/farmer/FarmerProductsView.vue'
 import SeckillView from '../views/SeckillView.vue'
 import UserLayout from '../views/user/UserLayout.vue'
@@ -39,6 +40,7 @@ const router = createRouter({
     { path: '/farmer/orders', name: 'farmer-orders', component: FarmerOrdersView, meta: { requiresAuth: true } },
     { path: '/admin/orders', name: 'admin-orders', component: AdminOrdersView, meta: { requiresAuth: true } },
     { path: '/admin/products', name: 'admin-products', component: AdminProductsView, meta: { requiresAuth: true, requiredRole: 'ADMIN' } },
+    { path: '/admin/farmers', name: 'admin-farmers', component: AdminFarmersView, meta: { requiresAuth: true, requiredRole: 'ADMIN' } },
     { path: '/farmer/products', name: 'farmer-products', component: FarmerProductsView, meta: { requiresAuth: true, requiredRole: 'FARMER' } },
     { path: '/farmer/products/:id/edit', name: 'farmer-product-edit', component: ProductFormView, meta: { requiresAuth: true, requiredRole: 'FARMER' } },
     {

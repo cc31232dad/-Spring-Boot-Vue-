@@ -1,67 +1,12 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { errorMessage, register } from '../../api/auth'
-
-const router = useRouter()
-const form = reactive({ username: '', phone: '', password: '', confirmPassword: '' })
-const error = ref('')
-const submitting = ref(false)
-
-async function submit() {
-  error.value = ''
-  if (form.password !== form.confirmPassword) {
-    error.value = '两次输入的密码不一致。'
-    return
-  }
-
-  submitting.value = true
-  try {
-    await register({ username: form.username, phone: form.phone, password: form.password })
-    await router.replace('/login')
-  } catch (reason) {
-    const message = errorMessage(reason)
-    error.value = message === 'Validation error'
-      ? '注册信息不符合规则，请检查用户名、手机号和密码。'
-      : message
-  } finally {
-    submitting.value = false
-  }
-}
+import { applyFarmer, errorMessage, register } from '../../api/auth'
+import { validateFarmerForm } from './farmerForm'
+const router=useRouter(); const mode=ref<'buyer'|'farmer'>('buyer'); const error=ref(''); const submitting=ref(false)
+const buyer=reactive({username:'',phone:'',password:'',confirmPassword:'',agreement:false})
+const farmer=reactive({phone:'',password:'',confirmPassword:'',realName:'',idCard:'',province:'',city:'',district:'',detailAddress:'',category:'',licenseNo:'',agreement:false})
+const categories=['新鲜水果','时令蔬菜','粮油米面','茶叶蜂蜜','肉禽蛋品','地方特产']; const areas={陕西省:{西安市:['雁塔区','长安区','未央区'],咸阳市:['秦都区','渭城区']},四川省:{成都市:['武侯区','锦江区'],绵阳市:['涪城区']}}
+async function submit(){error.value=''; if(mode.value==='buyer'&&buyer.password!==buyer.confirmPassword){error.value='两次输入的密码不一致。';return}; if(mode.value==='farmer'){const validation=validateFarmerForm(farmer);if(validation){error.value=validation;return}};submitting.value=true;try{if(mode.value==='buyer')await register({username:buyer.username,phone:buyer.phone,password:buyer.password});else await applyFarmer(farmer);await router.replace('/login')}catch(e){error.value=errorMessage(e)==='Validation error'?'注册信息不符合规则，请检查用户名、手机号和密码。':errorMessage(e)}finally{submitting.value=false}}
 </script>
-
-<template>
-  <main class="auth-page">
-    <section class="auth-card" aria-labelledby="register-title">
-      <p class="eyebrow">把好生活带回校园</p>
-      <h1 id="register-title">加入助农商城</h1>
-      <p class="intro">创建账号，和我们一起支持田野里的好收成。</p>
-
-      <form class="auth-form" @submit.prevent="submit">
-        <label>
-          用户名
-          <input v-model.trim="form.username" aria-describedby="username-rule" autocomplete="username" minlength="4" maxlength="32" pattern="[A-Za-z0-9_]{4,32}" required />
-          <span id="username-rule" class="field-help">4～32 位，只能使用字母、数字和下划线</span>
-        </label>
-        <label>
-          手机号
-          <input v-model.trim="form.phone" aria-describedby="phone-rule" inputmode="numeric" autocomplete="tel" pattern="\d{11}" required />
-          <span id="phone-rule" class="field-help">请输入 11 位数字</span>
-        </label>
-        <label>
-          密码
-          <input v-model="form.password" type="password" aria-describedby="password-rule" autocomplete="new-password" minlength="8" maxlength="64" pattern="(?=.*[A-Za-z])(?=.*\d).{8,64}" required />
-          <span id="password-rule" class="field-help">8～64 位，必须同时包含字母和数字</span>
-        </label>
-        <label>
-          确认密码
-          <input v-model="form.confirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="64" required />
-        </label>
-        <p v-if="error" class="form-error" role="alert">{{ error }}</p>
-        <button type="submit" :disabled="submitting">{{ submitting ? '正在创建…' : '创建账号' }}</button>
-      </form>
-
-      <p class="auth-switch">已有账号？<RouterLink to="/login">去登录</RouterLink></p>
-    </section>
-  </main>
-</template>
+<template><main class="auth-page"><section class="auth-card" aria-labelledby="register-title"><p class="eyebrow">把好生活带回校园</p><h1 id="register-title">加入助农商城</h1><div class="auth-tabs" role="tablist"><button type="button" :class="{active:mode==='buyer'}" @click="mode='buyer'">注册买家账号</button><button type="button" :class="{active:mode==='farmer'}" @click="mode='farmer'">注册农户账号</button></div><form class="auth-form" @submit.prevent="submit"><template v-if="mode==='buyer'"><label>用户名<input v-model.trim="buyer.username" minlength="4" maxlength="32" required /><span class="field-help">4～32 位，只能使用字母、数字和下划线</span></label><label>手机号<input v-model.trim="buyer.phone" inputmode="numeric" pattern="1[3-9]\d{9}" required /><span class="field-help">请输入 11 位数字</span></label><label>设置密码<input v-model="buyer.password" type="password" minlength="8" required /><span class="field-help">8～64 位，必须同时包含字母和数字</span></label><label>确认密码<input v-model="buyer.confirmPassword" type="password" required /></label></template><template v-else><p class="form-section-title">账户信息</p><label>手机号<input v-model.trim="farmer.phone" inputmode="numeric" pattern="1[3-9]\d{9}" required /></label><label>设置登录密码<input v-model="farmer.password" type="password" minlength="8" required /></label><label>确认密码<input v-model="farmer.confirmPassword" type="password" required /></label><p class="form-section-title">农户信息</p><label>真实姓名<input v-model.trim="farmer.realName" required /></label><label>身份证号<input v-model.trim="farmer.idCard" required /></label><div class="form-grid"><label>省<select v-model="farmer.province" required><option value="">请选择</option><option v-for="(_,name) in areas" :key="name" :value="name">{{ name }}</option></select></label><label>市<select v-model="farmer.city" required><option value="">请选择</option><option v-for="(_,name) in (areas[farmer.province as keyof typeof areas] || {})" :key="name" :value="name">{{ name }}</option></select></label><label>区<select v-model="farmer.district" required><option value="">请选择</option><option v-for="name in ((areas[farmer.province as keyof typeof areas] || {})[farmer.city as never] || [])" :key="name" :value="name">{{ name }}</option></select></label></div><label>详细地址<input v-model.trim="farmer.detailAddress" placeholder="乡镇、村、门牌号" required /></label><label>主营品类<select v-model="farmer.category" required><option value="">请选择</option><option v-for="name in categories" :key="name" :value="name">{{ name }}</option></select></label><label>营业执照编号（选填）<input v-model.trim="farmer.licenseNo" /></label></template><label class="agreement"><input v-model="(mode==='buyer'?buyer:farmer).agreement" type="checkbox" /> 我已阅读并同意用户协议和隐私政策</label><p v-if="error" class="form-error" role="alert">{{ error }}</p><button type="submit" :disabled="submitting">{{ submitting ? '正在提交…' : mode==='farmer' ? '提交入驻申请' : '创建账号' }}</button></form><p class="auth-switch">已有账号？<RouterLink to="/login">去登录</RouterLink></p></section></main></template>

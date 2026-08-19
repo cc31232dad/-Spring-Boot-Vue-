@@ -7,6 +7,8 @@ public record LoginRequest(
         String username,
 
         @NotBlank
-        String password
+        String password,
+
+        String role
 ) {
 }

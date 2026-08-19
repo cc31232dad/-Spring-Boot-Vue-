@@ -64,3 +64,11 @@ Order detail frontend completed on 2026-08-19: order detail route/page, logistic
 Payment and review boundaries completed on 2026-08-19: `PENDING_PAYMENT` orders expose a payment entry and `COMPLETED` orders expose a review entry from both order lists and the detail page. Both entries validate the loaded order status and display explicit unavailable notices; they do not call an API, charge funds, update order status, or persist reviews. Real payment records, sandbox integration, signed callbacks, idempotency, timeout closure, and the review backend remain deferred.
 
 Latest verification on 2026-08-19: backend `mvn test` passed 77 tests with 0 failures and 0 errors; frontend passed 33 tests and the production build succeeded.
+
+## Phase 8: Farmer onboarding and multi-role authentication
+
+Implemented on 2026-08-19 without replacing Spring Boot or the existing `roles`/`user_roles` model. Flyway V7 adds one-to-one `farmer_profiles` and append-only `farmer_audits`. Public farmer applications create a FARMER account in `PENDING`; pending and rejected farmers cannot log in, approved farmers can log in with their phone, and rejected profiles can be resubmitted without duplicating the user account.
+
+The Vue login page now separates buyer and farmer modes and exposes the administrator channel only as an internal link. Registration separates buyer quick registration from the farmer qualification form. ADMIN users can review applications at `/admin/farmers`. Administrator account creation and fine-grained administrator sub-roles remain deferred; there is still no public administrator registration path.
+
+Latest verification on 2026-08-19: backend passed 80 tests with 0 failures and 0 errors; frontend passed 36 tests and the production build succeeded.
