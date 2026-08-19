@@ -72,3 +72,5 @@ Implemented on 2026-08-19 without replacing Spring Boot or the existing `roles`/
 The Vue login page now separates buyer and farmer modes and exposes the administrator channel only as an internal link. Registration separates buyer quick registration from the farmer qualification form. ADMIN users can review applications at `/admin/farmers`. Administrator account creation and fine-grained administrator sub-roles remain deferred; there is still no public administrator registration path.
 
 Latest verification on 2026-08-19: backend passed 80 tests with 0 failures and 0 errors; frontend passed 36 tests and the production build succeeded.
+
+Browser end-to-end acceptance completed on 2026-08-19: a temporary farmer application stayed pending and was blocked from login, an ADMIN approved the farmer, the approved farmer submitted a product, ADMIN approved the product, and a temporary USER saw it in the public catalog and submitted a normal order. The acceptance used local temporary accounts/data only. When an old Spring Boot process is already bound to port 8080, stop it before restarting `mvn spring-boot:run` so the browser uses the current security configuration.
