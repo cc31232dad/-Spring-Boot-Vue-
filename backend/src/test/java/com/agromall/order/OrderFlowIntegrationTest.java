@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -116,6 +117,7 @@ class OrderFlowIntegrationTest {
     private Product insertProduct(User farmer, String name, int stock) {
         Product product = Product.create(1L, farmer.getId(), name, "Acceptance product",
                 new BigDecimal("12.50"), stock, "Shaanxi", "https://example.com/product.jpg");
+        product.approve(farmer.getId(), LocalDateTime.now());
         productMapper.insert(product);
         return product;
     }

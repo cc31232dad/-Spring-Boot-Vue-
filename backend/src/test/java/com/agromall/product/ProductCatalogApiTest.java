@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -49,6 +50,7 @@ class ProductCatalogApiTest {
 
         Product onSale = Product.create(1L, farmer.getId(), "洛川苹果", "脆甜红富士苹果",
                 new BigDecimal("29.90"), 100, "陕西洛川", "https://example.com/apple.jpg");
+        onSale.approve(farmer.getId(), LocalDateTime.now());
         productMapper.insert(onSale);
         onSaleProductId = onSale.getId();
 

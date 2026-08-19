@@ -38,15 +38,19 @@ Deferred: payment, seckill, logistics, refunds, coupons, reviews.
 Problems encountered: early test helpers used regular expressions to extract `"id"` from nested JSON responses. This was fragile because checkout responses include both order IDs and order-item IDs, and cart add responses include the whole cart list. Helpers were replaced with Jackson JSON tree traversal: checkout reads the first order ID directly and cart item lookup matches by `productId`. Maven also reports Mockito dynamic-agent warnings on JDK 21; current tests still pass.
 Verification: see `docs/testing/phase-3-cart-orders.md`; latest full checks passed on 2026-07-21.
 
-## Recommended next phases
-
 ## Phase 4: Redis seckill
 
 Implemented: seckill activity schema, Redis stock warmup, Lua atomic reservation, one-user-one-order protection, seckill order creation, Redis compensation, cancellation and timeout recovery, and frontend activity/rush page.
 Deferred: real payment integration and production Redis concurrency verification.
 Verification: see `docs/testing/phase-4-seckill.md`.
 
+## Phase 7: Product review foundation
+
+Implemented: Flyway V6 product review audit columns, `PENDING_REVIEW` and `REJECTED` domain states, farmer create/edit/resubmit transitions, review audit persistence, and public visibility protection. Existing sale-dependent tests now explicitly approve their fixtures. Full backend verification on 2026-08-19: 68 tests passed.
+Deferred: administrator review API and pages, farmer product status page, and end-to-end FARMER -> ADMIN -> USER acceptance flow.
+
 ## Recommended next phases
 
 1. Phase 5: Alipay sandbox payment.
-2. Phase 6: logistics, reviews, admin statistics, and UI polish.
+2. Phase 6: administrator product review API and pages.
+3. Phase 7: logistics, reviews, admin statistics, and UI polish.

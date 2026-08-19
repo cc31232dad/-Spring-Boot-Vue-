@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -90,7 +91,8 @@ class UserCenterApiTest {
         userRoleMapper.insert(user.getId(), role.getId()); return user;
     }
     private Product product(User farmer) {
-        Product product = Product.create(1L, farmer.getId(), "UC product", "desc", new BigDecimal("3.00"), 5, "Shaanxi", "https://example.com/p.jpg"); productMapper.insert(product); return product;
+        Product product = Product.create(1L, farmer.getId(), "UC product", "desc", new BigDecimal("3.00"), 5, "Shaanxi", "https://example.com/p.jpg");
+        product.approve(farmer.getId(), LocalDateTime.now()); productMapper.insert(product); return product;
     }
     private String login(String username, String phone) throws Exception {
         return mvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)

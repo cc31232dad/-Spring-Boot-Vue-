@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -51,6 +52,9 @@ class FarmerProductApiTest {
 
     @Autowired
     private ProductMapper productMapper;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
@@ -96,7 +100,7 @@ class FarmerProductApiTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.name").value("Fresh apples"))
                 .andExpect(jsonPath("$.data.farmerId").value(firstFarmer.getId()))
-                .andExpect(jsonPath("$.data.status").value("ON_SALE"));
+                .andExpect(jsonPath("$.data.status").value("PENDING_REVIEW"));
     }
 
     @Test
@@ -145,6 +149,48 @@ class FarmerProductApiTest {
                         .content(productRequest("Changed apples").replace("https://example.com/apple.jpg", "not-a-url")))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(1005));
+    }
+
+    @Test
+    void farmerUpdateResubmitsRejectedProductAndClearsReviewAudit() throws Exception {
+        Product product = Product.create(1L, firstFarmer.getId(), "Rejected apples", "Fresh apples",
+                new BigDecimal("12.50"), 30, "Shaanxi", "https://example.com/apple.jpg");
+        productMapper.insert(product);
+        jdbcTemplate.update("""
+                UPDATE product
+                SET status = 'REJECTED', reviewed_by = ?, reviewed_at = CURRENT_TIMESTAMP,
+                    review_reason = '图片不清晰'
+                WHERE id = ?
+                """, firstFarmer.getId(), product.getId());
+
+        mvc.perform(put("/api/farmer/products/{id}", product.getId())
+                        .header("Authorization", "Bearer " + firstFarmerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(productRequest("Updated apples")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("PENDING_REVIEW"));
+
+        var audit = jdbcTemplate.queryForMap("""
+                SELECT reviewed_by, reviewed_at, review_reason
+                FROM product
+                WHERE id = ?
+                """, product.getId());
+        org.assertj.core.api.Assertions.assertThat(audit.get("reviewed_by")).isNull();
+        org.assertj.core.api.Assertions.assertThat(audit.get("reviewed_at")).isNull();
+        org.assertj.core.api.Assertions.assertThat(audit.get("review_reason")).isNull();
+    }
+
+    @Test
+    void farmerOnSaleEndpointResubmitsProductForReview() throws Exception {
+        Product product = Product.create(1L, firstFarmer.getId(), "Resubmitted apples", "Fresh apples",
+                new BigDecimal("12.50"), 30, "Shaanxi", "https://example.com/apple.jpg");
+        product.offSale();
+        productMapper.insert(product);
+
+        mvc.perform(patch("/api/farmer/products/{id}/on-sale", product.getId())
+                        .header("Authorization", "Bearer " + firstFarmerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("PENDING_REVIEW"));
     }
 
     @Test

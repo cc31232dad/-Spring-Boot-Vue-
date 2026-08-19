@@ -20,6 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -46,7 +47,7 @@ class ProductFlowIntegrationTest {
     private UserRoleMapper userRoleMapper;
 
     @Test
-    void farmerPublishesProductPublicCatalogShowsItAndOffSaleHidesIt() throws Exception {
+    void farmerSubmitsProductAndPublicCatalogHidesItPendingReview() throws Exception {
         registerFarmer();
         String token = login();
 
@@ -58,7 +59,7 @@ class ProductFlowIntegrationTest {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.name").value("Acceptance peaches"))
-                .andExpect(jsonPath("$.data.status").value("ON_SALE"))
+                .andExpect(jsonPath("$.data.status").value("PENDING_REVIEW"))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -67,17 +68,7 @@ class ProductFlowIntegrationTest {
         mvc.perform(get("/api/products"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[?(@.id == %d)].name".formatted(productId),
-                        hasItem("Acceptance peaches")));
-
-        mvc.perform(get("/api/products/{id}", productId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.id").value(productId))
-                .andExpect(jsonPath("$.data.description").value("Sweet peaches for catalog acceptance"));
-
-        mvc.perform(patch("/api/farmer/products/{id}/off-sale", productId)
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.status").value("OFF_SALE"));
+                        not(hasItem("Acceptance peaches"))));
 
         mvc.perform(get("/api/products/{id}", productId))
                 .andExpect(status().isNotFound())

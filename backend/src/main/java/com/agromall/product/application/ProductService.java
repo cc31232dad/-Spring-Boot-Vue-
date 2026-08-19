@@ -90,10 +90,10 @@ public class ProductService {
     public ProductDetailView changeStatus(Long actorId, boolean admin, Long productId, ProductStatus status) {
         Product product = getProduct(productId);
         assertCanManage(actorId, admin, product);
-        if (status == ProductStatus.ON_SALE) {
-            product.onSale();
-        } else {
-            product.offSale();
+        switch (status) {
+            case PENDING_REVIEW -> product.submitForReview();
+            case OFF_SALE -> product.offSale();
+            default -> throw new IllegalArgumentException("Unsupported farmer product status: " + status);
         }
         productMapper.updateById(product);
         return toDetailView(product);

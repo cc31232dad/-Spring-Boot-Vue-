@@ -48,6 +48,6 @@ public class FarmerProductController {
     public ApiResponse<ProductDetailView> onSale(@AuthenticationPrincipal JwtService.JwtPrincipal principal,
                                                  @PathVariable Long id) {
         return ApiResponse.ok(productService.changeStatus(principal.userId(), principal.roles().contains("ADMIN"),
-                id, ProductStatus.ON_SALE));
+                id, ProductStatus.PENDING_REVIEW));
     }
 }
