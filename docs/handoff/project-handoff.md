@@ -51,10 +51,14 @@ Completed: administrator review page, farmer-owned product list API, and farmer 
 
 Administrator review API completed on 2026-08-19: `GET /api/admin/products/review`, `POST /api/admin/products/{id}/approve`, and `POST /api/admin/products/{id}/reject`. ADMIN-only access, pending-state guard, reviewer audit fields, reject reason validation, and public visibility are covered by integration tests.
 
+## Phase 9: Separate role workspaces
+
+Completed on 2026-08-20: the single Vue application now presents three role-specific surfaces. Buyers remain in the public mall at `/`; approved farmers land on `/farmer` with their own navigation for products and orders; administrators land on `/admin` with separate review and order navigation. Farmer and administrator dashboards compose existing APIs with partial-failure handling, and route contracts plus dashboard behavior are covered by frontend tests. `@lucide/vue` supplies the workspace navigation icons. No new backend API, table, operator role, customer-service role, super-administrator role, or administrator-creation flow was added.
+
 ## Recommended next phases
 
 1. Phase 5: Alipay sandbox payment.
-2. Complete browser-based product review acceptance, then add order details, logistics placeholders, and repurchase flows.
+2. Run browser regression for all three role workspaces at desktop and mobile sizes, then add order details, logistics placeholders, and repurchase flows.
 3. Phase 7: logistics, reviews, admin statistics, and UI polish.
 
 Account security frontend completed on 2026-08-19: profile, phone, and password forms have independent validation and feedback; password changes clear the current client session and require login with the new password. Wrong current passwords use business code 1024/HTTP 400 so they do not trigger JWT-expiry logout, and phone validation requires a `1[3-9]` prefix. Frontend verification: 25 tests passed and production build succeeded. Backend verification: 77 tests passed. Stateless JWTs are not revoked server-side after password changes; add token-version or revocation support before production.
