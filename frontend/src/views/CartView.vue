@@ -3,10 +3,14 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '../stores/cart'
 import { useOrderStore } from '../stores/orders'
+import { formatAddress, selectCheckoutAddress } from '../api/userCenter'
+import { useUserCenterStore } from '../stores/userCenter'
 
 const router = useRouter()
 const cartStore = useCartStore()
 const orderStore = useOrderStore()
+const userStore = useUserCenterStore()
+const selectedAddressId = ref<number | null>(null)
 const loadError = ref('')
 const actionError = ref('')
 const isLoading = ref(true)
@@ -26,12 +30,23 @@ async function loadCart() {
   loadError.value = ''
   isLoading.value = true
   try {
-    await cartStore.loadCart()
+    await Promise.all([cartStore.loadCart(), userStore.loadAddresses()])
+    const selected = selectCheckoutAddress(userStore.addresses)
+    if (selected) selectAddress(selected.id)
   } catch {
     loadError.value = '购物车暂时无法加载，请稍后重试。'
   } finally {
     isLoading.value = false
   }
+}
+
+function selectAddress(id: number) {
+  const address = userStore.addresses.find((item) => item.id === id)
+  if (!address) return
+  selectedAddressId.value = id
+  receiver.receiverName = address.name
+  receiver.receiverPhone = address.phone
+  receiver.receiverAddress = formatAddress(address)
 }
 
 async function changeQuantity(id: number, quantity: number, event: Event) {
@@ -139,6 +154,8 @@ async function checkout() {
             <button class="text-button" type="button" :disabled="changingItemId === item.id" @click="removeItem(item.id)">移除</button>
           </div>
         </article>
+
+        <section class="checkout-addresses"><div class="panel-heading"><div><p class="eyebrow">常用地址</p><h2>选择收货地址</h2></div><RouterLink :to="{ name: 'user-address' }">新增或管理地址</RouterLink></div><label v-for="address in userStore.addresses" :key="address.id" class="checkout-address"><input type="radio" name="checkout-address" :value="address.id" :checked="selectedAddressId === address.id" @change="selectAddress(address.id)"><span><strong>{{ address.name }} · {{ address.phone }}</strong><small>{{ formatAddress(address) }}</small></span><em v-if="address.isDefault">默认</em></label><p v-if="!userStore.addresses.length" class="muted-text">暂无常用地址，请填写下方收货信息或新增地址。</p></section>
 
         <form id="receiver-form" class="receiver-form" @submit.prevent="checkout">
           <div>

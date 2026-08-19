@@ -54,5 +54,5 @@ Administrator review API completed on 2026-08-19: `GET /api/admin/products/revie
 ## Recommended next phases
 
 1. Phase 5: Alipay sandbox payment.
-2. Complete browser-based product review acceptance and checkout address integration.
+2. Complete browser-based product review acceptance and account security integration.
 3. Phase 7: logistics, reviews, admin statistics, and UI polish.

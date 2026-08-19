@@ -228,3 +228,10 @@ a { color: var(--leaf-green); font-weight: 700; }
 .status-on_sale { color: #25683d; background: #ddf0df; }
 .status-off_sale { color: #5d695f; background: #e7ebe5; }
 .status-rejected { color: #8d3c31; background: #f8e1dd; }
+.checkout-addresses { display: grid; gap: 10px; padding: 22px; background: var(--card-white); box-shadow: var(--panel-shadow); }
+.checkout-addresses .panel-heading { margin-bottom: 4px; }
+.checkout-address { display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 12px; padding: 13px; border: 1px solid var(--input-border); border-radius: 8px; background: #fff; cursor: pointer; }
+.checkout-address input { width: auto; }
+.checkout-address span { display: grid; gap: 4px; }
+.checkout-address small { color: var(--muted-ink); line-height: 1.4; }
+.checkout-address em { color: var(--leaf-green); font-size: .75rem; font-style: normal; }
