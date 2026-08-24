@@ -82,6 +82,8 @@
 
 ## 7. 启动与验收
 
+商品图片上传目录由 `AGROMALL_UPLOAD_PRODUCT_DIR` 配置，默认是 `backend/uploads/products`。本地运行前创建该目录；容器化部署时将宿主机持久化目录挂载到同一路径，避免容器重建丢失图片。当前 Docker Compose 只启动 MySQL 和 Redis，Spring Boot 进程仍按文档单独启动。
+
 在 PowerShell 中执行：
 
 ```powershell
