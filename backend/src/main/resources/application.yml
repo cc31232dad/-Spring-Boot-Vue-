@@ -9,6 +9,7 @@ server.port: ${SERVER_PORT:8080}
 agromall:
   payment:
     sandbox-secret: ${AGROMALL_SANDBOX_PAYMENT_SECRET}
+    expiry-scan-ms: ${AGROMALL_PAYMENT_EXPIRY_SCAN_MS:60000}
   redis:
     key-prefix: "agromall:dev:"
   upload:

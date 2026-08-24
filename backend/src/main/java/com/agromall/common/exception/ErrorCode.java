@@ -29,6 +29,11 @@ public enum ErrorCode {
     FARMER_APPLICATION_REJECTED(1026, "Farmer application was rejected"),
     FARMER_APPLICATION_INVALID(1027, "Farmer application state is invalid"),
     FARMER_PROFILE_NOT_FOUND(1028, "Farmer profile not found"),
+    PAYMENT_NOT_FOUND(1029, "Payment record not found"),
+    PAYMENT_INVALID_STATUS(1030, "Payment status is invalid"),
+    PAYMENT_SIGNATURE_INVALID(1031, "Payment signature is invalid"),
+    PAYMENT_AMOUNT_MISMATCH(1032, "Payment amount does not match order"),
+    PAYMENT_EXPIRED(1033, "Payment has expired"),
     INTERNAL_ERROR(9999, "Internal server error");
 
     private final int code;
