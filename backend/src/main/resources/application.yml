@@ -7,6 +7,8 @@ spring:
   flyway.enabled: true
 server.port: ${SERVER_PORT:8080}
 agromall:
+  payment:
+    sandbox-secret: ${AGROMALL_SANDBOX_PAYMENT_SECRET}
   redis:
     key-prefix: "agromall:dev:"
   upload:

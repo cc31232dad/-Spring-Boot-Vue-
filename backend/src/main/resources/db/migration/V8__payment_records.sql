@@ -1,0 +1,22 @@
+CREATE TABLE payment_records (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    payment_no VARCHAR(40) NOT NULL,
+    order_id BIGINT NOT NULL,
+    order_no VARCHAR(40) NOT NULL,
+    buyer_id BIGINT NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    channel VARCHAR(20) NOT NULL,
+    status VARCHAR(16) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    paid_at DATETIME NULL,
+    callback_count INT NOT NULL DEFAULT 0,
+    last_callback_at DATETIME NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT uk_payment_records_payment_no UNIQUE (payment_no),
+    CONSTRAINT chk_payment_records_amount CHECK (amount >= 0),
+    CONSTRAINT chk_payment_records_status CHECK (status IN ('PENDING', 'PAID', 'FAILED', 'CLOSED')),
+    INDEX idx_payment_records_order (order_id),
+    INDEX idx_payment_records_buyer (buyer_id),
+    INDEX idx_payment_records_expiry (status, expires_at)
+);

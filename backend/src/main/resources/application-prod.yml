@@ -1,5 +1,7 @@
 agromall:
   environment: prod
+  payment:
+    sandbox-secret: ${AGROMALL_SANDBOX_PAYMENT_SECRET}
   redis:
     key-prefix: ${AGROMALL_REDIS_KEY_PREFIX}
   upload:
