@@ -12,6 +12,9 @@ spring:
     password: ${AGROMALL_REDIS_PASSWORD}
   flyway.enabled: true
 server.port: ${SERVER_PORT:8080}
+agromall:
+  upload:
+    product-dir: ${AGROMALL_UPLOAD_PRODUCT_DIR:uploads/products}
 agromall.jwt:
   secret: ${AGROMALL_JWT_SECRET}
   access-token-minutes: 30

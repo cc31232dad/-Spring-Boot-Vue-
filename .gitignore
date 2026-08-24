@@ -7,6 +7,7 @@
 backend/target/
 backend/target-stale-*/
 backend/.m2-repository/
+backend/uploads/
 .m2-repository/
 frontend/node_modules/
 frontend/dist/
