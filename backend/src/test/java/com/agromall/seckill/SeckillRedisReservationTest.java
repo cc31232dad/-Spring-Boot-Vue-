@@ -55,4 +55,13 @@ class SeckillRedisReservationTest {
         verify(values).increment("seckill:stock:7");
         verify(sets).remove("seckill:buyers:7", "42");
     }
+
+    @Test
+    void prefixesEverySeckillKeyWithEnvironmentNamespace() {
+        StringRedisTemplate redis = mock(StringRedisTemplate.class);
+        SeckillRedisReservation reservation = new SeckillRedisReservation(redis, "agromall:test:");
+
+        assertThat(reservation.stockKey(7L)).isEqualTo("agromall:test:seckill:stock:7");
+        assertThat(reservation.buyersKey(7L)).isEqualTo("agromall:test:seckill:buyers:7");
+    }
 }

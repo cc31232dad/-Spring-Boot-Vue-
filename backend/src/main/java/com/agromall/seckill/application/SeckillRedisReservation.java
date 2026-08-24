@@ -5,6 +5,7 @@ import com.agromall.common.exception.ErrorCode;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -14,9 +15,17 @@ public class SeckillRedisReservation {
 
     private static final DefaultRedisScript<Long> RESERVE_SCRIPT = reserveScript();
     private final StringRedisTemplate redis;
+    private final String keyPrefix;
 
     public SeckillRedisReservation(StringRedisTemplate redis) {
+        this(redis, "");
+    }
+
+    @Autowired
+    public SeckillRedisReservation(StringRedisTemplate redis,
+                                   @org.springframework.beans.factory.annotation.Value("${agromall.redis.key-prefix:}") String keyPrefix) {
         this.redis = redis;
+        this.keyPrefix = keyPrefix;
     }
 
     private static DefaultRedisScript<Long> reserveScript() {
@@ -55,10 +64,10 @@ public class SeckillRedisReservation {
     }
 
     public String stockKey(Long activityId) {
-        return "seckill:stock:" + activityId;
+        return keyPrefix + "seckill:stock:" + activityId;
     }
 
     public String buyersKey(Long activityId) {
-        return "seckill:buyers:" + activityId;
+        return keyPrefix + "seckill:buyers:" + activityId;
     }
 }
