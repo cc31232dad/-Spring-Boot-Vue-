@@ -31,6 +31,7 @@
 - 农户创建、修改、重新提交均进入待审核；公开接口只展示 `ON_SALE`。
 - 管理员商品审核 API 与页面：筛选、通过、带原因拒绝。
 - 农户商品管理页：本人商品、状态、拒绝原因、重新提交和下架。
+- 商品图片上传已完成：农户可桌面拖拽/点击选择，移动端从相册选择；后端接口为 `POST /api/farmer/product-images`，仅 `FARMER` 可用，支持 JPG/PNG/WEBP，单文件 5 MB，返回 `/uploads/products/<uuid>.<ext>`。
 
 ### 交易与用户中心
 
@@ -60,7 +61,6 @@
 
 ### 必须先做
 
-- 图片拖拽/点击上传：当前商品仅保存 `imageUrl`，尚无上传 API、文件校验和持久化方案。
 - 生产数据隔离：清理验收账号和演示商品，区分开发、测试、生产数据。
 
 ### 后续交易能力
@@ -78,9 +78,27 @@
 
 ## 6. 图片上传建议
 
-第一阶段采用拖拽 + 点击选择 + 本地预览，后端保存到 `backend/uploads/products`，限制 JPG/PNG/WEBP、单文件 5 MB，校验 MIME 和扩展名，生成安全文件名并返回 `/uploads/products/<name>.webp`。Docker 环境需将上传目录挂载为 volume。稳定后可迁移 MinIO/OSS，数据库继续只保存 URL，不保存图片二进制。图片链接入口可保留作为备用方式。
+商品图片第一阶段已采用拖拽 + 点击选择 + 移动端相册 + 本地预览，后端保存到 `backend/uploads/products`，限制 JPG/PNG/WEBP、单文件 5 MB，同时校验文件头、MIME 和扩展名，生成 UUID 文件名并返回图片 URL。配置项为 `AGROMALL_UPLOAD_PRODUCT_DIR`。容器化部署需将上传目录挂载为 volume；稳定后可迁移 MinIO/OSS，数据库继续只保存 URL，不保存图片二进制。移动端拍照、多图详情和历史图片复用延期到体验优化阶段。
 
 ## 7. 启动与验收
+
+### 环境隔离
+
+后端默认使用 `dev` profile。开发、测试和生产分别使用独立的 MySQL 数据库、Redis key 前缀和商品图片目录：
+
+- `dev`：数据库默认 `agromall`，Redis 前缀 `agromall:dev:`，图片目录 `uploads/products`。
+- `test`：数据库默认 `agromall_test`，Redis 前缀 `agromall:test:`，图片目录 `uploads/test-products`。
+- `prod`：必须显式设置 `AGROMALL_DB_URL`、`AGROMALL_DB_USERNAME`、`AGROMALL_DB_PASSWORD`、`AGROMALL_REDIS_HOST`、`AGROMALL_REDIS_PORT`、`AGROMALL_REDIS_PASSWORD`、`AGROMALL_REDIS_KEY_PREFIX`、`AGROMALL_JWT_SECRET` 和 `AGROMALL_UPLOAD_PRODUCT_DIR`，缺少值时不使用开发默认值。
+
+PowerShell 选择 profile：
+
+```powershell
+$env:SPRING_PROFILES_ACTIVE = "dev" # 或 test / prod
+cd backend
+mvn spring-boot:run
+```
+
+测试数据库、Redis 数据和测试上传目录均为可清理数据；验收账号和演示商品不得通过初始化脚本自动进入生产。
 
 商品图片上传目录由 `AGROMALL_UPLOAD_PRODUCT_DIR` 配置，默认是 `backend/uploads/products`。本地运行前创建该目录；容器化部署时将宿主机持久化目录挂载到同一路径，避免容器重建丢失图片。当前 Docker Compose 只启动 MySQL 和 Redis，Spring Boot 进程仍按文档单独启动。
 
@@ -103,8 +121,8 @@ npm run dev -- --host 0.0.0.0
 
 ## 8. 验证结果
 
-- 后端全量测试：80 项通过，0 failures，0 errors。
-- 前端全量测试：46 项通过。
+- 后端全量测试：89 项通过，0 failures，0 errors。
+- 前端全量测试：49 项通过。
 - 前端生产构建：通过。
 - 浏览器验收：管理员、农户、买家桌面和移动端通过；无水平溢出，控制台无错误。
 
@@ -116,4 +134,4 @@ npm run dev -- --host 0.0.0.0
 
 ## 10. 推荐下一步
 
-先实现图片拖拽上传的后端存储和前端表单闭环，再推进支付或物流/评价，最后实现管理员账号创建和细分权限。每项都应补充接口权限测试、前端测试和浏览器回归验收。
+图片上传闭环已完成。下一步先做生产数据隔离，再推进沙箱支付；之后按路线文档完善秒杀库存一致性、物流、评价、售后和管理员安全能力。移动端拍照属于最后的体验优化。每项都应补充接口权限测试、前端测试和浏览器回归验收。
