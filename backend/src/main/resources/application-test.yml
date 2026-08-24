@@ -1,0 +1,15 @@
+agromall:
+  environment: test
+  redis:
+    key-prefix: "agromall:test:"
+  upload:
+    product-dir: uploads/test-products
+spring:
+  datasource:
+    url: ${AGROMALL_TEST_DB_URL:jdbc:mysql://localhost:3306/agromall_test?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai}
+    username: ${AGROMALL_TEST_DB_USERNAME:${AGROMALL_DB_USERNAME:agromall}}
+    password: ${AGROMALL_TEST_DB_PASSWORD:${AGROMALL_DB_PASSWORD}}
+  data.redis:
+    host: ${AGROMALL_TEST_REDIS_HOST:${AGROMALL_REDIS_HOST:localhost}}
+    port: ${AGROMALL_TEST_REDIS_PORT:${AGROMALL_REDIS_PORT:6379}}
+    password: ${AGROMALL_TEST_REDIS_PASSWORD:${AGROMALL_REDIS_PASSWORD}}
