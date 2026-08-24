@@ -1,0 +1,17 @@
+agromall:
+  environment: prod
+  redis:
+    key-prefix: ${AGROMALL_REDIS_KEY_PREFIX}
+  upload:
+    product-dir: ${AGROMALL_UPLOAD_PRODUCT_DIR}
+spring:
+  datasource:
+    url: ${AGROMALL_DB_URL}
+    username: ${AGROMALL_DB_USERNAME}
+    password: ${AGROMALL_DB_PASSWORD}
+  data.redis:
+    host: ${AGROMALL_REDIS_HOST}
+    port: ${AGROMALL_REDIS_PORT}
+    password: ${AGROMALL_REDIS_PASSWORD}
+agromall.jwt:
+  secret: ${AGROMALL_JWT_SECRET}

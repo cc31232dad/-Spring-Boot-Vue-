@@ -1,6 +1,8 @@
 package com.agromall.product.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
@@ -9,6 +11,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -26,6 +29,12 @@ public class Product {
     private String originPlace;
     private String imageUrl;
     private String status;
+    @TableField(updateStrategy = FieldStrategy.ALWAYS)
+    private Long reviewedBy;
+    @TableField(updateStrategy = FieldStrategy.ALWAYS)
+    private LocalDateTime reviewedAt;
+    @TableField(updateStrategy = FieldStrategy.ALWAYS)
+    private String reviewReason;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -40,7 +49,7 @@ public class Product {
         product.stock = stock;
         product.originPlace = originPlace;
         product.imageUrl = imageUrl;
-        product.status = ProductStatus.ON_SALE.name();
+        product.submitForReview();
         return product;
     }
 
@@ -53,10 +62,31 @@ public class Product {
         this.stock = stock;
         this.originPlace = originPlace;
         this.imageUrl = imageUrl;
+        submitForReview();
     }
 
-    public void onSale() {
+    public void submitForReview() {
+        this.status = ProductStatus.PENDING_REVIEW.name();
+        this.reviewedBy = null;
+        this.reviewedAt = null;
+        this.reviewReason = null;
+    }
+
+    public void approve(Long reviewerId, LocalDateTime reviewTime) {
         this.status = ProductStatus.ON_SALE.name();
+        this.reviewedBy = Objects.requireNonNull(reviewerId, "reviewerId must not be null");
+        this.reviewedAt = Objects.requireNonNull(reviewTime, "reviewTime must not be null");
+        this.reviewReason = null;
+    }
+
+    public void reject(Long reviewerId, LocalDateTime reviewTime, String reason) {
+        if (reason == null || reason.isBlank()) {
+            throw new IllegalArgumentException("review reason must not be blank");
+        }
+        this.status = ProductStatus.REJECTED.name();
+        this.reviewedBy = Objects.requireNonNull(reviewerId, "reviewerId must not be null");
+        this.reviewedAt = Objects.requireNonNull(reviewTime, "reviewTime must not be null");
+        this.reviewReason = reason.trim();
     }
 
     public void offSale() {

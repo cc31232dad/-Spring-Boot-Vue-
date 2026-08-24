@@ -14,4 +14,9 @@ public interface UserMapper extends BaseMapper<User> {
         return Optional.ofNullable(selectOne(Wrappers.<User>lambdaQuery()
                 .eq(User::getUsername, username)));
     }
+
+    default Optional<User> selectByUsernameOrPhone(String identifier) {
+        return Optional.ofNullable(selectOne(Wrappers.<User>lambdaQuery()
+                .eq(User::getUsername, identifier).or().eq(User::getPhone, identifier)));
+    }
 }

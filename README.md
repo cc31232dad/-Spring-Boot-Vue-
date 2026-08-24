@@ -1,6 +1,6 @@
 # Agricultural Mall
 
-Phase 1 provides account registration, login, JWT session recovery, and role-based API access. Phase 2 adds the product catalog, including public browsing and farmer/admin product management.
+Phase 1 provides account registration, login, JWT session recovery, and role-based API access. Phase 2 adds the product catalog, including public browsing and farmer/admin product management. Phase 3 adds cart management and normal orders, including farmer-split checkout and order status workflows.
 
 ## Prerequisites
 
@@ -21,8 +21,23 @@ Start the backend in one terminal:
 
 ```powershell
 cd backend
+# Local development (the default profile is dev)
+$env:SPRING_PROFILES_ACTIVE = "dev"
 mvn spring-boot:run
 ```
+
+Use the isolated test profile when running an application instance against test data:
+
+```powershell
+$env:SPRING_PROFILES_ACTIVE = "test"
+mvn spring-boot:run
+```
+
+Production must use `SPRING_PROFILES_ACTIVE=prod` and provide `AGROMALL_DB_URL`,
+`AGROMALL_DB_USERNAME`, `AGROMALL_DB_PASSWORD`, `AGROMALL_REDIS_HOST`,
+`AGROMALL_REDIS_PORT`, `AGROMALL_REDIS_PASSWORD`, `AGROMALL_REDIS_KEY_PREFIX`,
+`AGROMALL_JWT_SECRET`, and `AGROMALL_UPLOAD_PRODUCT_DIR`. Production has no
+development fallbacks for these values.
 
 Start the frontend in another terminal:
 
@@ -57,6 +72,8 @@ npm run build
 ```
 
 For the Phase 2 product catalog acceptance flow and browser checklist, see [docs/testing/phase-2-product-catalog.md](docs/testing/phase-2-product-catalog.md).
+
+For the Phase 3 cart and normal orders acceptance flow and browser checklist, see [docs/testing/phase-3-cart-orders.md](docs/testing/phase-3-cart-orders.md).
 
 ## Security notes
 

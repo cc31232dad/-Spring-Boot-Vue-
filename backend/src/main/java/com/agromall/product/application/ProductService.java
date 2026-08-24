@@ -7,6 +7,7 @@ import com.agromall.product.api.ProductCreateRequest;
 import com.agromall.product.api.ProductDetailView;
 import com.agromall.product.api.ProductSummaryView;
 import com.agromall.product.api.ProductUpdateRequest;
+import com.agromall.product.api.ProductReviewView;
 import com.agromall.product.domain.Product;
 import com.agromall.product.domain.ProductCategory;
 import com.agromall.product.domain.ProductStatus;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -77,6 +79,13 @@ public class ProductService {
         return toDetailView(product);
     }
 
+    public List<ProductReviewView> listFarmerProducts(Long farmerId) {
+        return productMapper.selectList(new LambdaQueryWrapper<Product>()
+                        .eq(Product::getFarmerId, farmerId)
+                        .orderByDesc(Product::getCreatedAt))
+                .stream().map(this::toReviewView).toList();
+    }
+
     public ProductDetailView updateProduct(Long actorId, boolean admin, Long productId, ProductUpdateRequest request) {
         Product product = getProduct(productId);
         assertCanManage(actorId, admin, product);
@@ -90,13 +99,46 @@ public class ProductService {
     public ProductDetailView changeStatus(Long actorId, boolean admin, Long productId, ProductStatus status) {
         Product product = getProduct(productId);
         assertCanManage(actorId, admin, product);
-        if (status == ProductStatus.ON_SALE) {
-            product.onSale();
-        } else {
-            product.offSale();
+        if (!admin && !isAllowedFarmerTransition(product, status)) {
+            throw new BusinessException(ErrorCode.PRODUCT_REVIEW_INVALID);
+        }
+        switch (status) {
+            case PENDING_REVIEW -> product.submitForReview();
+            case OFF_SALE -> product.offSale();
+            default -> throw new IllegalArgumentException("Unsupported farmer product status: " + status);
         }
         productMapper.updateById(product);
         return toDetailView(product);
+    }
+
+    private boolean isAllowedFarmerTransition(Product product, ProductStatus target) {
+        ProductStatus current = ProductStatus.valueOf(product.getStatus());
+        return (target == ProductStatus.OFF_SALE && current == ProductStatus.ON_SALE)
+                || (target == ProductStatus.PENDING_REVIEW
+                    && (current == ProductStatus.OFF_SALE || current == ProductStatus.REJECTED));
+    }
+
+    public List<ProductReviewView> listReviewProducts(ProductStatus status) {
+        LambdaQueryWrapper<Product> wrapper = new LambdaQueryWrapper<Product>()
+                .eq(Product::getStatus, status.name())
+                .orderByDesc(Product::getCreatedAt);
+        return productMapper.selectList(wrapper).stream().map(this::toReviewView).toList();
+    }
+
+    public ProductReviewView approveProduct(Long reviewerId, Long productId) {
+        Product product = getProduct(productId);
+        assertPendingReview(product);
+        product.approve(reviewerId, LocalDateTime.now());
+        productMapper.updateById(product);
+        return toReviewView(product);
+    }
+
+    public ProductReviewView rejectProduct(Long reviewerId, Long productId, String reason) {
+        Product product = getProduct(productId);
+        assertPendingReview(product);
+        product.reject(reviewerId, LocalDateTime.now(), reason);
+        productMapper.updateById(product);
+        return toReviewView(product);
     }
 
     private Product getProduct(Long productId) {
@@ -113,6 +155,12 @@ public class ProductService {
         }
     }
 
+    private void assertPendingReview(Product product) {
+        if (!ProductStatus.PENDING_REVIEW.name().equals(product.getStatus())) {
+            throw new BusinessException(ErrorCode.PRODUCT_REVIEW_INVALID);
+        }
+    }
+
     private void assertCategoryExists(Long categoryId) {
         if (categoryMapper.selectById(categoryId) == null) {
             throw new BusinessException(ErrorCode.CATEGORY_NOT_FOUND);
@@ -124,6 +172,14 @@ public class ProductService {
         return new ProductDetailView(product.getId(), product.getCategoryId(), categoryName, product.getFarmerId(),
                 product.getName(), product.getDescription(), product.getPrice(), product.getStock(),
                 product.getOriginPlace(), product.getImageUrl(), product.getStatus());
+    }
+
+    private ProductReviewView toReviewView(Product product) {
+        String categoryName = categoryNames().get(product.getCategoryId());
+        return new ProductReviewView(product.getId(), product.getCategoryId(), categoryName, product.getFarmerId(),
+                product.getName(), product.getDescription(), product.getPrice(), product.getStock(),
+                product.getOriginPlace(), product.getImageUrl(), product.getStatus(), product.getReviewedBy(),
+                product.getReviewedAt(), product.getReviewReason());
     }
 
     private Map<Long, String> categoryNames() {

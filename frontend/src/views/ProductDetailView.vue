@@ -1,19 +1,89 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { getProduct, type ProductDetail } from '../api/products'
+import { useAuthStore } from '../stores/auth'
+import { useCartStore } from '../stores/cart'
+import { useUserCenterStore } from '../stores/userCenter'
 
 const route = useRoute()
+const router = useRouter()
+const auth = useAuthStore()
+const cartStore = useCartStore()
+const userStore = useUserCenterStore()
 const product = ref<ProductDetail | null>(null)
 const loadError = ref('')
+const quantity = ref(1)
+const addError = ref('')
+const isAdding = ref(false)
+const isFavoriteBusy = ref(false)
+const isFavorite = ref(false)
+
+function normalizedQuantity() {
+  if (!product.value) return null
+
+  const requestedQuantity = Number(quantity.value)
+  if (!Number.isInteger(requestedQuantity) || requestedQuantity < 1) {
+    quantity.value = 1
+    addError.value = '购买数量至少为 1。'
+    return null
+  }
+
+  if (requestedQuantity > product.value.stock) {
+    quantity.value = product.value.stock
+    addError.value = '购买数量不能超过当前库存。'
+    return null
+  }
+
+  return requestedQuantity
+}
 
 onMounted(async () => {
   try {
     product.value = await getProduct(Number(route.params.id))
+    if (auth.isLoggedIn) {
+      await userStore.loadFavorites()
+      isFavorite.value = userStore.favorites.some((item) => item.productId === product.value?.id)
+    }
   } catch {
     loadError.value = '商品暂时无法加载，请稍后返回目录重试。'
   }
 })
+
+async function toggleFavorite() {
+  if (!product.value) return
+  if (!auth.isLoggedIn) { await router.push({ name: 'login', query: { redirect: route.fullPath } }); return }
+  isFavoriteBusy.value = true
+  try {
+    if (isFavorite.value) await userStore.removeFavorite(product.value.id)
+    else await userStore.addFavorite(product.value.id)
+    isFavorite.value = !isFavorite.value
+  } finally { isFavoriteBusy.value = false }
+}
+
+async function addToCart() {
+  if (!product.value) return
+
+  addError.value = ''
+  const requestedQuantity = normalizedQuantity()
+  if (requestedQuantity === null) return
+
+  if (!auth.isLoggedIn) {
+    await router.push({ name: 'login', query: { redirect: route.fullPath } })
+    return
+  }
+
+  isAdding.value = true
+
+  try {
+    await cartStore.addItem({ productId: product.value.id, quantity: requestedQuantity })
+    await router.push({ name: 'cart' })
+  } catch {
+    addError.value = '加入购物车失败，请确认库存后重试。'
+  } finally {
+    isAdding.value = false
+  }
+}
 </script>
 
 <template>
@@ -36,6 +106,17 @@ onMounted(async () => {
           <span>商品说明</span>
           <p>{{ product.description }}</p>
         </div>
+        <button class="favorite-button" type="button" :disabled="isFavoriteBusy" @click="toggleFavorite">{{ isFavorite ? '已收藏' : '收藏商品' }}</button>
+        <div class="add-to-cart">
+          <label class="quantity-control">
+            <span>购买数量</span>
+            <input v-model.number="quantity" type="number" min="1" :max="product.stock" :disabled="product.stock < 1" />
+          </label>
+          <button type="button" :disabled="isAdding || product.stock < 1" @click="addToCart">
+            {{ product.stock < 1 ? '暂时售罄' : isAdding ? '正在加入…' : '加入购物车' }}
+          </button>
+        </div>
+        <p v-if="addError" class="form-error" role="alert">{{ addError }}</p>
       </div>
     </article>
   </main>

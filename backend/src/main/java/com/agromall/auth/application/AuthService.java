@@ -12,6 +12,8 @@ import com.agromall.user.domain.User;
 import com.agromall.user.infrastructure.RoleMapper;
 import com.agromall.user.infrastructure.UserMapper;
 import com.agromall.user.infrastructure.UserRoleMapper;
+import com.agromall.farmer.domain.FarmerApplicationStatus;
+import com.agromall.farmer.infrastructure.FarmerProfileMapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,19 +29,22 @@ public class AuthService {
     private final UserRoleMapper userRoleMapper;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final FarmerProfileMapper farmerProfileMapper;
 
     public AuthService(
             UserMapper userMapper,
             RoleMapper roleMapper,
             UserRoleMapper userRoleMapper,
             BCryptPasswordEncoder passwordEncoder,
-            JwtService jwtService
+            JwtService jwtService,
+            FarmerProfileMapper farmerProfileMapper
     ) {
         this.userMapper = userMapper;
         this.roleMapper = roleMapper;
         this.userRoleMapper = userRoleMapper;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.farmerProfileMapper = farmerProfileMapper;
     }
 
     @Transactional
@@ -61,10 +66,23 @@ public class AuthService {
     }
 
     public TokenView login(LoginRequest request) {
-        User user = userMapper.selectByUsername(request.username())
+        User user = userMapper.selectByUsernameOrPhone(request.username())
                 .filter(candidate -> passwordEncoder.matches(request.password(), candidate.getPasswordHash()))
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CREDENTIALS));
 
-        return TokenView.bearer(jwtService.issue(user, roleMapper.selectCodesByUserId(user.getId())));
+        var roles = roleMapper.selectCodesByUserId(user.getId());
+        if (request.role() != null && !request.role().isBlank() && !roles.contains(request.role()))
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        if (Boolean.FALSE.equals(user.getEnabled())) throw new BusinessException(ErrorCode.FORBIDDEN);
+        if (roles.contains("FARMER")) {
+            var profile = farmerProfileMapper.selectOne(Wrappers.<com.agromall.farmer.domain.FarmerProfile>lambdaQuery()
+                    .eq(com.agromall.farmer.domain.FarmerProfile::getUserId, user.getId()));
+            if (profile != null && profile.getStatus() == FarmerApplicationStatus.PENDING)
+                throw new BusinessException(ErrorCode.FARMER_APPLICATION_PENDING);
+            if (profile != null && profile.getStatus() == FarmerApplicationStatus.REJECTED)
+                throw new BusinessException(ErrorCode.FARMER_APPLICATION_REJECTED);
+        }
+
+        return TokenView.bearer(jwtService.issue(user, roles));
     }
 }

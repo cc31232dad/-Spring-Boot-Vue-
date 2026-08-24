@@ -19,6 +19,10 @@ public class User {
     private Long id;
 
     private String username;
+    private String nickname;
+    private String realName;
+    private String email;
+    private String avatarUrl;
     private String passwordHash;
     private String phone;
     private Boolean enabled;

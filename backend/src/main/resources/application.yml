@@ -1,17 +1,16 @@
 spring:
   config:
     import: "optional:file:../.env[.properties]"
+  profiles:
+    default: dev
   application.name: agricultural-mall
-  datasource:
-    url: ${AGROMALL_DB_URL:jdbc:mysql://localhost:3306/agromall?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai}
-    username: ${AGROMALL_DB_USERNAME:agromall}
-    password: ${AGROMALL_DB_PASSWORD}
-  data.redis:
-    host: ${AGROMALL_REDIS_HOST:localhost}
-    port: ${AGROMALL_REDIS_PORT:6379}
-    password: ${AGROMALL_REDIS_PASSWORD}
   flyway.enabled: true
 server.port: ${SERVER_PORT:8080}
+agromall:
+  redis:
+    key-prefix: "agromall:dev:"
+  upload:
+    product-dir: uploads/products
 agromall.jwt:
   secret: ${AGROMALL_JWT_SECRET}
   access-token-minutes: 30

@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -23,6 +24,7 @@ class ProductSchemaTest {
     @Autowired ProductCategoryMapper categoryMapper;
     @Autowired ProductMapper productMapper;
     @Autowired UserMapper userMapper;
+    @Autowired JdbcTemplate jdbcTemplate;
 
     @Test
     void seedsCategoriesAndPersistsProduct() {
@@ -48,8 +50,22 @@ class ProductSchemaTest {
         productMapper.insert(product);
 
         Product saved = productMapper.selectById(product.getId());
-        assertThat(saved.getStatus()).isEqualTo("ON_SALE");
+        assertThat(saved.getStatus()).isEqualTo("PENDING_REVIEW");
         assertThat(saved.getPrice()).isEqualByComparingTo("29.90");
         assertThat(saved.getStock()).isEqualTo(100);
+
+        jdbcTemplate.update("""
+                UPDATE product
+                SET reviewed_by = ?, reviewed_at = CURRENT_TIMESTAMP, review_reason = '信息不完整'
+                WHERE id = ?
+                """, farmer.getId(), product.getId());
+        var review = jdbcTemplate.queryForMap("""
+                SELECT reviewed_by, reviewed_at, review_reason
+                FROM product
+                WHERE id = ?
+                """, product.getId());
+        assertThat(((Number) review.get("reviewed_by")).longValue()).isEqualTo(farmer.getId());
+        assertThat(review.get("reviewed_at")).isNotNull();
+        assertThat(review.get("review_reason")).isEqualTo("信息不完整");
     }
 }
