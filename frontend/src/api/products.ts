@@ -72,6 +72,13 @@ export async function listAdminProducts(status?: ProductStatus) {
   return data.data as ProductDetail[]
 }
 
+export async function uploadProductImage(file: File) {
+  const formData = new FormData()
+  formData.append('file', file)
+  const { data } = await http.post('/farmer/product-images', formData)
+  return data.data.url as string
+}
+
 export async function approveProduct(id: number) {
   const { data } = await http.post(`/admin/products/${id}/approve`)
   return data.data as ProductDetail

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import http from './http'
-import { approveProduct, listAdminProducts, listFarmerProducts, rejectProduct, updateProduct } from './products'
+import { approveProduct, listAdminProducts, listFarmerProducts, rejectProduct, updateProduct, uploadProductImage } from './products'
 
 vi.mock('./http', () => ({ default: { get: vi.fn(), post: vi.fn(), put: vi.fn(), patch: vi.fn() } }))
 
@@ -31,5 +31,15 @@ describe('product review api', () => {
     vi.mocked(http.get).mockResolvedValue({ data: { data: [] } })
     await expect(listFarmerProducts()).resolves.toEqual([])
     expect(http.get).toHaveBeenCalledWith('/farmer/products')
+  })
+
+  it('uploads a product image as multipart form data', async () => {
+    vi.mocked(http.post).mockResolvedValue({ data: { data: { url: '/uploads/products/apple.png' } } })
+    const file = new File(['png'], 'apple.png', { type: 'image/png' })
+
+    await expect(uploadProductImage(file)).resolves.toBe('/uploads/products/apple.png')
+    const [, config] = vi.mocked(http.post).mock.calls[0]
+    expect(http.post).toHaveBeenCalledWith('/farmer/product-images', expect.any(FormData))
+    expect((config as FormData).get('file')).toBe(file)
   })
 })
