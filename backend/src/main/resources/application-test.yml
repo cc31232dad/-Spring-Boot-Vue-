@@ -1,5 +1,7 @@
 agromall:
   environment: test
+  payment:
+    sandbox-secret: ${AGROMALL_SANDBOX_PAYMENT_SECRET:test-sandbox-secret}
   redis:
     key-prefix: "agromall:test:"
   upload:

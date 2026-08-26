@@ -33,6 +33,15 @@
 - 农户商品管理页：本人商品、状态、拒绝原因、重新提交和下架。
 - 商品图片上传已完成：农户可桌面拖拽/点击选择，移动端从相册选择；后端接口为 `POST /api/farmer/product-images`，仅 `FARMER` 可用，支持 JPG/PNG/WEBP，单文件 5 MB，返回 `/uploads/products/<uuid>.<ext>`。
 
+### 沙箱支付
+
+- Flyway V8 新增 `payment_records`。
+- 买家可调用 `POST /api/orders/{id}/payment` 创建或复用 15 分钟沙箱支付单。
+- 开发验收可在订单详情点击“模拟支付成功/失败”；前端调用 `POST /api/payments/sandbox/simulate`，后端生成 HMAC 回调并走真实验签路径。
+- 外部回调接口为 `POST /api/payments/sandbox/callback`，字段签名顺序为 `paymentNo|orderNo|amount|result|timestamp`，密钥配置项为 `AGROMALL_SANDBOX_PAYMENT_SECRET`。
+- 成功回调将订单从 `PENDING_PAYMENT` 改为 `PENDING_SHIPMENT`；失败保持待支付；重复回调不重复转换。
+- 定时任务每 60 秒关闭过期支付单并取消仍待支付订单。当前仍未接入真实支付渠道、退款和支付对账。
+
 ### 交易与用户中心
 
 - 买家购物车、结算、库存扣减、普通订单、订单详情、再次购买。

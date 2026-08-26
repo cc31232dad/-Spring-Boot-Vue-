@@ -33,6 +33,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/farmer/apply").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categories", "/api/products", "/api/products/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/seckill", "/api/seckill/*").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/payments/sandbox/callback").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/farmer/product-images").hasRole("FARMER")
                         .requestMatchers("/api/farmer/**").hasAnyRole("FARMER", "ADMIN")

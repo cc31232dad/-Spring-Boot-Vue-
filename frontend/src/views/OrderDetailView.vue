@@ -3,6 +3,8 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import type { Order, OrderStatus } from '../api/orders'
 import { getOrder } from '../api/orders'
+import { createPayment, simulatePayment } from '../api/payment'
+import type { Payment } from '../api/payment'
 import { useCartStore } from '../stores/cart'
 import { getOrderExperience, getOrderExperienceNotice } from './orderExperience'
 
@@ -14,6 +16,8 @@ const loading = ref(true)
 const error = ref('')
 const actionError = ref('')
 const actionNotice = ref('')
+const payment = ref<Payment | null>(null)
+const paying = ref(false)
 const repurchasing = ref(false)
 const experience = computed(() => order.value ? getOrderExperience(order.value.status) : null)
 const labels: Record<OrderStatus, string> = {
@@ -38,6 +42,29 @@ onMounted(async () => {
 function showActionNotice(action: 'payment' | 'review') {
   if (!order.value) return
   actionNotice.value = getOrderExperienceNotice(order.value.status, action)
+}
+
+async function openPayment() {
+  if (!order.value) return
+  paying.value = true
+  actionError.value = ''
+  try { payment.value = await createPayment(order.value.id); actionNotice.value = '沙箱支付已创建，不会产生真实扣款' }
+  catch { actionError.value = '支付单创建失败，请稍后重试' }
+  finally { paying.value = false }
+}
+
+async function simulate(result: 'SUCCESS' | 'FAILURE') {
+  if (!payment.value) return
+  paying.value = true
+  actionError.value = ''
+  try {
+    payment.value = await simulatePayment(payment.value.paymentNo, result)
+    if (result === 'SUCCESS') {
+      order.value = await getOrder(order.value!.id)
+      actionNotice.value = '沙箱支付成功，订单已进入待发货'
+    } else actionNotice.value = '沙箱支付失败，订单仍保持待支付'
+  } catch { actionError.value = '沙箱支付处理失败，请重试' }
+  finally { paying.value = false }
 }
 
 async function repurchase() {
@@ -108,12 +135,20 @@ async function repurchase() {
           <p v-if="actionNotice" class="order-boundary-notice" role="status">{{ actionNotice }}</p>
         </div>
         <div class="order-action-group">
-          <button v-if="experience?.payment" type="button" class="primary-action" @click="showActionNotice('payment')">去支付</button>
+          <button v-if="experience?.payment && !payment" type="button" class="primary-action" :disabled="paying" @click="openPayment">{{ paying ? '创建支付中...' : '去支付' }}</button>
           <button v-if="experience?.review" type="button" class="primary-action" @click="showActionNotice('review')">评价商品</button>
           <button type="button" :disabled="repurchasing || order.status === 'CANCELLED'" @click="repurchase">
             {{ repurchasing ? '正在加入购物车...' : '再次购买' }}
           </button>
         </div>
+        <section v-if="payment" class="order-boundary-notice" aria-label="沙箱支付">
+          <strong>沙箱支付</strong><span>支付单：{{ payment.paymentNo }} · ¥{{ payment.amount.toFixed(2) }}</span>
+          <span>状态：{{ payment.status }}，过期时间：{{ payment.expiresAt }}</span>
+          <div v-if="payment.status === 'PENDING'" class="order-action-group">
+            <button type="button" :disabled="paying" @click="simulate('SUCCESS')">模拟支付成功</button>
+            <button type="button" :disabled="paying" @click="simulate('FAILURE')">模拟支付失败</button>
+          </div>
+        </section>
       </footer>
     </article>
   </main>

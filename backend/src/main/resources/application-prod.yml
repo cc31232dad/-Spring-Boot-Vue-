@@ -1,5 +1,8 @@
 agromall:
   environment: prod
+  payment:
+    sandbox-secret: ${AGROMALL_SANDBOX_PAYMENT_SECRET}
+    expiry-scan-ms: ${AGROMALL_PAYMENT_EXPIRY_SCAN_MS:60000}
   redis:
     key-prefix: ${AGROMALL_REDIS_KEY_PREFIX}
   upload:
